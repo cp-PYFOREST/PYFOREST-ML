@@ -27,3 +27,15 @@ Informing Forest Conservation Regulations in Paraguay
 
 ## Description
 We aim to predict deforestation patterns in the undeveloped region of the Paraguayan Chaco by training a machine learning model. Utilizing a random forest algorithm from the sci-kit-learn library, we incorporate historical deforestation patterns, LUP data, and relevant environmental features such as distance to rivers, road proximity, soil type, and precipitation. This model enables more accurate predictions of deforestation patterns, accounting for variations in LUP laws and the complex interplay of socio-economic and environmental factors driving land use change.
+
+### Usage
+
+
+## Contributors
+[Atahualpa Ayala](Atahualpa-Ayala), [Dalila Lara](https://github.com/dalilalara), [Alexandria Reed](https://github.com/reedalexandria)
+
+Any advise for common problems or issues.
+
+## License
+
+This project is licensed under the Apache-2.0 License - see the LICENSE.md file for details
