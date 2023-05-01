@@ -1,0 +1,372 @@
+```{r}
+#| include: false
+library(sf)
+library(tmap)
+library(tidyverse)
+library(here)
+library(knitr)
+library(units)
+library(tictoc)
+```
+
+```{r}
+#| include: false
+#| warning: false
+
+limit <- st_read('/Users/romero61/../../capstone/pyforest/data/permited_land_use/limit/limite_put.shp')
+```
+
+```{r}
+#| include: false
+#| warning: false
+
+
+
+
+limit_dup <- limit |> 
+  select(id, put_id, anho_capa, estado, fecha_res,cod_dpto, cod_dist) |> 
+  mutate(year_inactive = NA, 
+         to_putid = NA, .before = geom) |> 
+  filter(anho_capa <= 2020)
+
+# find the inactive properties from subset that intersect the larger dataset
+limit_intersect <- st_intersection(limit_dup, limit) 
+
+# Get a sorted list of the unique  put_ids
+limit_put_ids <- sort(limit_dup$put_id)
+
+
+# Loop through the inactive put_ids
+for (i in limit_put_ids){
+  # Filter the intersection dataset to only include rows where the put_id matches the current iteration,and select only the put_id.1, anho_capa, and anho_capa.1 columns (put_id.1 is the ID of the property that this property was merged into, anho_capa is the year this property became inactive, and anho_capa.1 is theyear the property it was merged into became active)
+  temp_df <- limit_intersect %>%
+    filter(put_id == i) %>%
+    select(put_id, put_id.1, anho_capa, anho_capa.1) |>
+    # Create a new column to store the percentage of the current property that overlaps with the merged property
+    mutate(area = NA)
+
+    # Get the area of the merged property that the current property overlaps with
+  area_i <-  temp_df |>
+  filter(put_id.1 == i) |>
+  st_area() |>
+  drop_units()
+  
+    # Calculate the percentage of the current property that overlaps with the merged property,and filter the temp_df to only include rows where this percentage is greater than 25%
+  temp_df['area'] <- (drop_units(st_area(temp_df))/ area_i) * 100
+  temp_df <- temp_df |>
+    filter(area > 25)
+  
+    # If there's only one row in temp_df, use the current year as the year_inactive for the current property
+  if(nrow(temp_df) == 1){
+    # if there's only one row, use the current year
+    limit_dup <- limit_dup %>% 
+      mutate(year_inactive = ifelse(put_id == i, 2023, year_inactive),
+             to_putid = ifelse(put_id == i, temp_df$put_id.1, to_putid))
+  } else {
+    
+    # If there's more than one row in temp_df, get the current_year (the year the current property became inactive) and the next_year (the year the merged property became active after the current_year), and update the year_inactive and to_putid columns accordingly
+    
+    current_year <- temp_df$anho_capa[1]
+    next_year <- min(temp_df$anho_capa.1[temp_df$anho_capa.1 > current_year])
+    if (is.infinite(next_year)) {
+      # if there's no next higher year, use 2023
+      limit_dup <- limit_dup %>% 
+        mutate(year_inactive = ifelse(put_id == i & is.na(year_inactive), 2023, year_inactive),
+               to_putid = ifelse(put_id == i & is.na(to_putid), temp_df$put_id.1[which(temp_df$anho_capa == current_year)], to_putid))
+    } else {
+      limit_dup <- limit_dup %>% 
+        mutate(year_inactive = ifelse(put_id == i & is.na(year_inactive), next_year, year_inactive),
+               to_putid = ifelse(put_id == i & is.na(to_putid), temp_df$put_id.1[which(temp_df$anho_capa.1 == next_year)], to_putid))
+    }
+  }
+}  
+
+
+#saveRDS(properties,'/capstone/pyforest/data/active_inactive/active_inactive.rds')
+#rm(inactive_intersect, temp_df, current_year, i, inactive_put_ids, next_year)
+```
+
+# Make Subsets
+
+
+```{r}
+limit_fecha_res <- limit |>
+  select(put_id, fecha_res, cat) |>
+  st_drop_geometry()
+
+
+#T his filter selects properties that: 
+# 1. Became active during the year 2011 (anho_capa >= 2011 & anho_capa < 2012)
+# 2. Or became active before 2011 and remained active through at least 2011 (anho_capa < 2011 & year_inactive >= 2011)
+
+active_properties_2011 <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
+  left_join(limit_fecha_res, by= "put_id") |> 
+  filter(anho_capa <= 2011 & year_inactive >= 2011)
+
+active_properties_2012 <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
+  left_join(limit_fecha_res, by= "put_id") |> 
+  filter(anho_capa <= 2012 & year_inactive >= 2012)
+
+active_properties_2013 <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
+  left_join(limit_fecha_res, by= "put_id") |> 
+  filter(anho_capa <= 2013 & year_inactive >= 2013)
+
+active_properties_2014 <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
+  left_join(limit_fecha_res, by= "put_id") |> 
+  filter(anho_capa <= 2014 & year_inactive >= 2014)
+
+active_properties_2015 <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
+  left_join(limit_fecha_res, by= "put_id") |> 
+  filter(anho_capa <= 2015 & year_inactive >= 2015)
+
+active_properties_2016 <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
+  left_join(limit_fecha_res, by= "put_id") |> 
+  filter(anho_capa <= 2016 & year_inactive >= 2016)
+
+active_properties_2017 <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
+  left_join(limit_fecha_res, by= "put_id") |> 
+  filter(anho_capa <= 2017 & year_inactive >= 2017)
+
+active_properties_2018 <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
+  left_join(limit_fecha_res, by= "put_id") |> 
+  filter(anho_capa <= 2018 & year_inactive >= 2018)
+
+active_properties_2019 <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
+  left_join(limit_fecha_res, by= "put_id") |> 
+  filter(anho_capa <= 2019 & year_inactive >= 2019)
+
+active_properties_2020 <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
+  left_join(limit_fecha_res, by= "put_id") |> 
+  filter(anho_capa <= 2020 & year_inactive >= 2020)
+
+active_properties_2021 <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
+  left_join(limit_fecha_res, by= "put_id") |> 
+  filter(anho_capa <= 2021 & year_inactive >= 2021)
+
+```
+
+
+
+
+```{r}
+#years <- 2011:2021
+# assign() function to create individual variables for each year in the global environment
+#  will create individual variables named "active_properties_2011", "active_properties_2012", ..., 
+#"active_properties_2021" in the global environment. Each variable will contain the active properties for the corresponding year.
+# for (year in years) {
+#   active_properties <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
+#     left_join(limit_fecha_res, by= "put_id") |> 
+#     filter((anho_capa >= year & anho_capa < (year + 1)) | (anho_capa < year & year_inactive >= year))
+  
+#   assign(paste0("active_properties_", year), active_properties, envir = .GlobalEnv)
+# }
+```
+
+```{r}
+# export each of the shapefiles using a loop
+# for (year in years) {
+#   active_properties_year <- get(paste0("active_properties_", year))
+#   st_write(active_properties_year, paste0("/path/to/save/active_properties_", year, ".shp"))
+# }
+```
+
+```{r}
+
+active_inactive <- active_properties_2021
+
+```
+
+
+```{r}
+
+find_row_with_putid <- function(putid) {
+  row <- active_inactive[active_inactive$put_id == putid, ]
+  if (nrow(row) == 0) {
+    return(NULL)
+  }
+  return(row)
+}
+```
+
+
+```{r}
+# Vector of all put_ids
+put_ids <- sort(active_inactive$put_id)
+
+# Initialize empty data frames to store rows with the max fecha_res value and removed rows
+max_fecha_res_rows <- data.frame()
+removed_rows <- data.frame()
+tic()
+
+
+for (put_id in put_ids) {
+  current_max_fecha_res <- -Inf
+  current_max_row <- NULL
+  visited_rows <- c()
+  
+  row <- find_row_with_putid(put_id)
+  repeat {
+    if (is.null(row)) {
+      break
+    }
+    
+    if (row$put_id %in% visited_rows) {
+      # Continue iterating through the visited rows to find the max fecha_res value
+      for (visited_put_id in visited_rows) {
+        visited_row <- find_row_with_putid(visited_put_id)
+        if (!is.na(visited_row$fecha_res) &&
+            visited_row$fecha_res > current_max_fecha_res) {
+          current_max_fecha_res <- visited_row$fecha_res
+          current_max_row <- visited_row
+        }
+      }
+      max_fecha_res_rows <- rbind(max_fecha_res_rows, current_max_row)
+      break
+    }
+    
+    visited_rows <- append(visited_rows, row$put_id)
+    
+    if (!is.na(row$fecha_res) &&
+        row$fecha_res > current_max_fecha_res) {
+      current_max_fecha_res <- row$fecha_res
+      current_max_row <- row
+    }
+    
+    to_putid <- row$to_putid
+    if (to_putid == row$put_id) {
+      break
+    }
+    
+    row <- find_row_with_putid(to_putid)
+  }
+  
+  if (!is.null(current_max_row)) {
+    removed_rows <- rbind(removed_rows, active_inactive[active_inactive$put_id %in% visited_rows & active_inactive$put_id != current_max_row$put_id, ])
+    active_inactive <- active_inactive[!active_inactive$put_id %in% visited_rows | active_inactive$put_id == current_max_row$put_id, ]
+  }
+  toc()
+}
+toc()
+
+
+
+```
+
+
+
+```{r}
+
+clean <-  active_inactive |> 
+  mutate(cat = substr(cat, start = 1, stop = 5)) |> 
+  group_by(cat) %>%
+  arrange(desc(fecha_res)) %>%
+  slice(1) %>%
+  ungroup()
+
+#st_write(clean,'/Users/romero61/../../capstone/pyforest/data/active_inactive/active_inactive_subsets/active_inactive_21.gpkg')
+```
+
+```{r}
+
+```
+
+```{r}
+
+# t_df1894 <- property_intersect |>
+#   filter(put_id == 'PUT1894') |>
+#   select(put_id, put_id.1, anho_capa, anho_capa.1) |>
+#   mutate(area = NA) 
+# 
+# 
+# area_i1894 <-  t_df1894 |>
+#   filter(put_id.1 == 'PUT1894') |>
+#   st_area() |>
+#   drop_units()
+# 
+# 
+# t_df1894['area'] <- (drop_units(st_area(t_df1894))/ area_i1894) * 100
+# t_df1894 <- t_df1894 |>
+#     filter(area > 25)
+# 
+# ####
+# 
+# t_df2589 <- property_intersect |>
+#   filter(put_id == 'PUT2589') |>
+#   select(put_id, put_id.1, anho_capa, anho_capa.1) |>
+#   mutate(area = NA) 
+# 
+# 
+# area_i2589 <-  t_df2589 |>
+#   filter(put_id.1 == 'PUT2589') |>
+#   st_area() |>
+#   drop_units()
+# 
+# 
+# t_df2589['area'] <- (drop_units(st_area(t_df2589))/ area_i2589) * 100
+# t_df2589 <- t_df2589 |>
+#     filter(area > 25)
+# 
+# 
+# 
+# current_year <- t_df2589$anho_capa[1]
+#     next_year <- min(t_df2589$anho_capa.1[t_df2589$anho_capa.1 > current_year])
+#     if (is.infinite(next_year)) {
+#       # if there's no next higher year, use the current year
+#       properties <- properties %>% 
+#         mutate(year_inactive = ifelse(put_id == i & is.na(year_inactive), current_year, year_inactive),
+#                to_putid = ifelse(put_id == i & is.na(to_putid), t_df2589$put_id.1[which(t_df2589$anho_capa == current_year)], to_putid))
+#     } else {
+#       properties <- properties %>% 
+#         mutate(year_inactive = ifelse(put_id == i & is.na(year_inactive), next_year, year_inactive),
+#                to_putid = ifelse(put_id == i & is.na(to_putid), t_df2589$put_id.1[which(t_df2589$anho_capa.1 == next_year)], to_putid))
+#     }
+#     
+#     
+#     
+#     
+# 
+# #####
+# t_df3224 <- property_intersect |>
+#   filter(put_id == 'PUT3224') |>
+#   select(put_id, put_id.1, anho_capa, anho_capa.1) |>
+#   mutate(area = NA) 
+# 
+# 
+# area_i3224 <-  t_df3224 |>
+#   filter(put_id.1 == 'PUT3224') |>
+#   st_area() |>
+#   drop_units()
+# 
+# 
+# t_df3224['area'] <- (drop_units(st_area(t_df3224))/ area_i) * 100
+# t_df3224 <- t_df3224 |>
+#     filter(area > 25)
+# 
+# ####
+# t_df1996 <- property_intersect |>
+#   filter(put_id == 'PUT1996') |>
+#   select(put_id, put_id.1, anho_capa, anho_capa.1) |>
+#   mutate(area = NA) 
+# 
+# 
+# area_i1996 <-  t_df1996 |>
+#   filter(put_id.1 == 'PUT1996') |>
+#   st_area() |>
+#   drop_units()
+# 
+# 
+# t_df1996['area'] <- (drop_units(st_area(t_df1996))/ area_i1996) * 100
+# t_df1996 <- t_df1996 |>
+#     filter(area > 25)
+
+# current <- t_df$anho_capa[2]
+# next_index <- which(temp_df$anho_capa.1 > current_year)[1]
+# 
+# # find the index of the smallest year greater than the current year
+# next_index <- which(temp_df$anho_capa.1 > current_year)[1]
+# # get the next year
+# next_year <- temp_df$anho_capa.1[next_index]
+# inactive_properties['year_inactive'][i] <- next_year
+```
+
+

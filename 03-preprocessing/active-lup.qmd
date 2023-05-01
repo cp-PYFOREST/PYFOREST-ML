@@ -1,0 +1,102 @@
+```{r}
+# Load packages ---------------------------------------------------------
+library(sf)
+library(tidyverse)
+library(terra) 
+library(tmap)
+library(leaflet)
+library(ggplot2)
+library(exactextractr)
+library(units)
+library(tictoc)
+```
+
+
+# DATA
+
+
+```{r}
+# Data ---------------------------------------------------------
+active_inactive_11 <- st_read("/Users/romero61/../../capstone/pyforest/ml_data/active_inactive_subsets/active_inactive_11.gpkg")
+```
+
+
+
+
+
+```{r}
+
+
+# LUP w/forest reserve/hedgerows/paddocks polygons ----------------------------------
+
+lup <- st_read("/Users/romero61/../../capstone/pyforest/data/permited_land_use/lup_gpkg/lup.gpkg", layer = "lup")
+```
+
+# Check CRS
+
+```{r}
+st_crs(active_inactive_11) 
+# Coordinate Reference System:
+#   User input: WGS 84 / UTM zone 21S 
+#   wkt:
+# PROJCRS["WGS 84 / UTM zone 21S"
+
+
+st_crs(lup)
+
+# Coordinate Reference System:
+#   User input: WGS 84 
+#   wkt:
+# GEOGCRS["WGS 84
+```
+
+
+```{r}
+lup_w_categories_proj <- st_transform(lup, st_crs(active_inactive_11))
+st_crs(lup_w_categories_proj)
+# Coordinate Reference System:
+#   User input: PROJCRS["WGS 84 / UTM zone 21S",
+#     BASEGEOGCRS["WGS 84"
+```
+
+
+
+### Subset of LUP
+
+```{r}
+
+# Filter the permitted_lup data with the active properties for the year range
+lup_active_11 <- lup_w_categories_proj %>% 
+  filter(put_id %in% active_inactive_11$put_id) |>
+  select(id, put_id, categoria_ant, grupo, categoria)
+
+#st_crs(lup_active_year)
+# Coordinate Reference System:
+#   User input: PROJCRS["WGS 84 / UTM zone 21S",
+#     BASEGEOGCRS["WGS 84"
+
+st_write(lup_active_11,'/Users/romero61/../../capstone/pyforest/ml_data/lup_subsets/lup_11.gpkg')
+```
+
+
+
+```{r}
+# Loop through years 2012-2021
+for (year in 12:21) {
+  # Read active_inactive data for the year
+  active_inactive_file <- paste0("/Users/romero61/../../capstone/pyforest/ml_data/active_inactive_subsets/active_inactive_", year, ".gpkg")
+  active_inactive_year <- st_read(active_inactive_file)
+  
+  # Check CRS and transform lup if needed
+  lup_w_categories_proj <- st_transform(lup, st_crs(active_inactive_year))
+  
+  # Filter the permitted_lup data with the active properties for the year
+  lup_active_year <- lup_w_categories_proj %>% 
+    filter(put_id %in% active_inactive_year$put_id) |>
+    select(id, put_id, categoria_ant, grupo, categoria)
+
+  # Write the output file
+  output_file <- paste0('/Users/romero61/../../capstone/pyforest/ml_data/lup_subsets/lup_', year, '.gpkg')
+  st_write(lup_active_year, output_file)
+}
+```
