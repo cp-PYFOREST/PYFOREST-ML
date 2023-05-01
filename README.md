@@ -32,7 +32,7 @@ We aim to predict deforestation patterns in the undeveloped region of the Paragu
 
 
 ## Contributors
-[Atahualpa Ayala](Atahualpa-Ayala), [Dalila Lara](https://github.com/dalilalara), [Alexandria Reed](https://github.com/reedalexandria)
+[Atahualpa Ayala](Atahualpa-Ayala),  [Dalila Lara](https://github.com/dalilalara),  [Alexandria Reed](https://github.com/reedalexandria),  [Guillermo Romero](https://github.com/romero61)
 
 Any advise for common problems or issues.
 
