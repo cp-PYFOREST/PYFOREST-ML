@@ -30,9 +30,9 @@ or `pip install seaborn`
 or `conda install seaborn` 
 12. `conda install -c conda-forge earthengine-api`
 13. `conda install -c conda-forge google-cloud-sdk` This worked on the server but wouldn't run on my local though it has in the past. Earth Engine and geemap still worked fine afterwards.
-14. 'pip install geemap'
-15. pip install xarray #optional
-pip install rioxarray #optional
+14. `pip install geemap`
+15. `pip install xarray` - optional
+16. `pip install rioxarray` - optional
 
 
 
