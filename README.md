@@ -27,6 +27,17 @@ Informing Forest Conservation Regulations in Paraguay
 
 ## Description
 We predicted deforestation patterns in the undeveloped region of the Paraguayan Chaco by training a machine learning model. Utilizing a random forest algorithm from the sci-kit-learn library, we incorporate historical deforestation patterns, LUP data, and relevant environmental features such as distance to rivers, road proximity, soil type, and precipitation. This model enables more accurate predictions of deforestation patterns, accounting for variations in LUP laws and the complex interplay of socio-economic and environmental factors driving land use change.
+### Quickstart
+A quick rundown of the order the files were created and used allowing users to jump in to the process where they feel most appropriate in their workflow.
+
+1. Update constants.py to your filepaths
+2. active_inactive.qmd
+3. active_lup.qmd
+4. hansen-ee.ipynb
+5. extract-pixels-hansen.ipynb 
+6. process-shapefiles.ipynb 
+7. crop-mask-lup.ipynb
+8. random-forest.ipynb
 
 ### Usage
 
