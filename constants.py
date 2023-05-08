@@ -41,3 +41,8 @@ LUP_YEAR_PATHS = [
 OUTPUT_PATH = [
     os.path.join(SERVER_PATH, 'ml_data', 'output')
 ]
+
+# Base feature stacks
+MASKED_RASTERS_DIR = [
+    os.path.join(OUTPUT_PATH[0], 'masked_rasters')
+]
