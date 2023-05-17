@@ -19,11 +19,12 @@ HANSEN_LOSSYEAR_FILEPATHS = [
     os.path.join(SERVER_PATH, 'ml_data', 'raw_hansen', 'lossyear.tiff')
 ]
 
-# loss year disaggragated by year and into binary for year of deforestation
-DEFORESTATION_YEAR_PATHS = [
-    os.path.join(SERVER_PATH, 'ml_data', 'raw_hansen', 'deforestation_by_year_binary' f'deforestation_{i}.tif')
-    for i in range(11, 22)
-]
+# loss year in binary for year of deforestation 2011-2020
+DEFORESTATION_1120_PATH = os.path.join(SERVER_PATH, 'ml_data', 'output', 'deforestation-cumulative_0110', 'deforestation_11_to_20.tif')
+
+
+# treecover in 2010
+TREECOVER_2010 = os.path.join(SERVER_PATH, 'ml_data', 'output', 'deforestation-cumulative_0110', 'reclassified_tree_cover_10.tif')
 
 # INFONA DATA
 PROPERTIES_SHAPEFILE_PATHS = [
@@ -32,9 +33,8 @@ PROPERTIES_SHAPEFILE_PATHS = [
 ]
 
 # INFONA DATA
-LUP_YEAR_PATHS = [
-    os.path.join(SERVER_PATH, 'ml_data', 'lup_subsets',  f'lup_{i}.gpkg')
-    for i in range(11, 22)
+LUP_YEAR = [
+    os.path.join(SERVER_PATH, 'ml_data', 'lup_subsets',  'lup_10.gpkg')
 ]
 
 # Where to save outputs
@@ -46,3 +46,5 @@ OUTPUT_PATH = [
 MASKED_RASTERS_DIR = [
     os.path.join(OUTPUT_PATH[0], 'masked_rasters')
 ]
+
+LUP_LUT_RASTER = os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters', 'land_use_type', 'lup_10_land_use_type_raster.tif')

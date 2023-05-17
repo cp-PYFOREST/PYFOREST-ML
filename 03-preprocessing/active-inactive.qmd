@@ -93,11 +93,17 @@ for (i in limit_put_ids){
 limit_fecha_res <- limit |>
   select(put_id, fecha_res, cat) |>
   st_drop_geometry()
+```
 
+```{r}
+active_properties_0010 <- readRDS('/capstone/pyforest/lup_assessment_data/active_inactive/active_inactive.rds') |> 
+  left_join(limit_fecha_res, by= "put_id") |> 
+  filter(anho_capa <= 2010 & year_inactive >= 2010)
 
-#T his filter selects properties that: 
-# 1. Became active during the year 2011 (anho_capa >= 2011 & anho_capa < 2012)
-# 2. Or became active before 2011 and remained active through at least 2011 (anho_capa < 2011 & year_inactive >= 2011)
+#write_rds(active_properties_0010,'/capstone/pyforest/ml_data/active_inactive_subsets/active_properties_0010.rds')
+```
+
+```{r}
 
 active_properties_2011 <- readRDS('/capstone/pyforest/data/active_inactive/active_inactive.rds') |> 
   left_join(limit_fecha_res, by= "put_id") |> 
@@ -172,7 +178,7 @@ active_properties_2021 <- readRDS('/capstone/pyforest/data/active_inactive/activ
 
 ```{r}
 
-active_inactive <- active_properties_2021
+active_inactive <- active_properties_0010
 
 ```
 
@@ -263,7 +269,8 @@ clean <-  active_inactive |>
   slice(1) %>%
   ungroup()
 
-#st_write(clean,'/Users/romero61/../../capstone/pyforest/data/active_inactive/active_inactive_subsets/active_inactive_21.gpkg')
+st_write(clean,'/capstone/pyforest/ml_data/active_inactive_subsets/active_inactive_0010.gpkg')
+
 ```
 
 ```{r}

@@ -17,7 +17,7 @@ library(tictoc)
 
 ```{r}
 # Data ---------------------------------------------------------
-active_inactive_11 <- st_read("/Users/romero61/../../capstone/pyforest/ml_data/active_inactive_subsets/active_inactive_11.gpkg")
+active_inactive_0010 <- st_read('/capstone/pyforest/ml_data/active_inactive_subsets/active_inactive_0010.gpkg')
 ```
 
 
@@ -29,13 +29,13 @@ active_inactive_11 <- st_read("/Users/romero61/../../capstone/pyforest/ml_data/a
 
 # LUP w/forest reserve/hedgerows/paddocks polygons ----------------------------------
 
-lup <- st_read("/Users/romero61/../../capstone/pyforest/data/permited_land_use/lup_gpkg/lup.gpkg", layer = "lup")
+lup <- st_read("/Users/romero61/../../capstone/pyforest/data/permited_land_use/lup_gpkg/lup.gpkg", layer = "lup_cadaster")
 ```
 
 # Check CRS
 
 ```{r}
-st_crs(active_inactive_11) 
+st_crs(active_inactive_0010) 
 # Coordinate Reference System:
 #   User input: WGS 84 / UTM zone 21S 
 #   wkt:
@@ -52,7 +52,7 @@ st_crs(lup)
 
 
 ```{r}
-lup_w_categories_proj <- st_transform(lup, st_crs(active_inactive_11))
+lup_w_categories_proj <- st_transform(lup, st_crs(active_inactive_0010))
 st_crs(lup_w_categories_proj)
 # Coordinate Reference System:
 #   User input: PROJCRS["WGS 84 / UTM zone 21S",
@@ -66,8 +66,8 @@ st_crs(lup_w_categories_proj)
 ```{r}
 
 # Filter the permitted_lup data with the active properties for the year range
-lup_active_11 <- lup_w_categories_proj %>% 
-  filter(put_id %in% active_inactive_11$put_id) |>
+lup_active_0010 <- lup_w_categories_proj %>% 
+  filter(put_id %in% active_inactive_0010$put_id) |>
   select(id, put_id, categoria_ant, grupo, categoria)
 
 #st_crs(lup_active_year)
@@ -75,7 +75,7 @@ lup_active_11 <- lup_w_categories_proj %>%
 #   User input: PROJCRS["WGS 84 / UTM zone 21S",
 #     BASEGEOGCRS["WGS 84"
 
-st_write(lup_active_11,'/Users/romero61/../../capstone/pyforest/ml_data/lup_subsets/lup_11.gpkg')
+st_write(lup_active_0010,'/capstone/pyforest/ml_data/lup_subsets/lup_10.gpkg')
 ```
 
 
