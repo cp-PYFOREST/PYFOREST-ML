@@ -14,17 +14,17 @@ STUDY_BOUNDARY_PATH = os.path.join(SERVER_PATH,'ml_data', 'study_boundary', 'stu
 HANSEN_TREECOVER_FILEPATH = [
     os.path.join(SERVER_PATH, 'ml_data', 'raw_hansen', 'treecover2000.tif')
 ]
-# raw earth engine data /Users/romero61/../../capstone/pyforest/ml_data/raw_hansen
+# raw earth engine data 
 HANSEN_LOSSYEAR_FILEPATHS = [
     os.path.join(SERVER_PATH, 'ml_data', 'raw_hansen', 'lossyear.tiff')
 ]
 
 # loss year in binary for year of deforestation 2011-2020
-DEFORESTATION_1120_PATH = os.path.join(SERVER_PATH, 'ml_data', 'output', 'deforestation-cumulative_0110', 'deforestation_11_to_20.tif')
+DEFORESTATION_1120_PATH = os.path.join(SERVER_PATH, 'ml_data', 'output', 'deforestation-cumulative_0110', 'deforestation11_20.tif')
 
 
 # treecover in 2010
-TREECOVER_2010 = os.path.join(SERVER_PATH, 'ml_data', 'output', 'deforestation-cumulative_0110', 'reclassified_tree_cover_10.tif')
+TREECOVER_2010 = os.path.join(SERVER_PATH, 'ml_data', 'output', 'deforestation-cumulative_0110', 'treecover2010.tif')
 
 # INFONA DATA
 PROPERTIES_SHAPEFILE_PATHS = [
@@ -42,9 +42,12 @@ OUTPUT_PATH = [
     os.path.join(SERVER_PATH, 'ml_data', 'output')
 ]
 
+
+LUP_LUT_RASTER = os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters', 'land_use_type', 'lup_10_land_use_type_raster.tif')
+
+# The folder masked rasters contains the required files for the machine learning model. deforestation11_20_masked.tif is alway the 'y' target variable
+
 # Base feature stacks
 MASKED_RASTERS_DIR = [
     os.path.join(OUTPUT_PATH[0], 'masked_rasters')
-]
-
-LUP_LUT_RASTER = os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters', 'land_use_type', 'lup_10_land_use_type_raster.tif')
+    ]
