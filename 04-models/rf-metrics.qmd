@@ -1,6 +1,37 @@
 ---
-title: "Untitled"
-format: html
+title: "Metrics"
+author: "Guillermo Romero"
+date: today
+format: 
+  pdf:
+      toc: false
+      shift-heading-level-by: 2
+      fig-pos: "H"
+      fig-cap-location: top
+      geometry:
+        - top=1in
+        - right=.8in
+        - bottom=1in
+        - left=.8in
+      link-citations: yes
+      linkcolor: blue
+      include-in-header: 
+        text: |
+          \usepackage{fancyhdr}
+          \usepackage{titling}
+          \pagestyle{fancy}
+          \fancyhf{}
+          \renewcommand\maketitle{
+            \fancyhead[C]{
+              \thetitle
+              \ifx \theauthor\empty  \else \ – \theauthor \fi
+              \ifx \thedate\empty  \else \ – \thedate \ \fi
+            }
+          }
+          \fancyfoot[C]{\thepage}
+editor: 
+  markdown: 
+    wrap: sentence
 ---
 # Model 
 Best parameters: {'max_depth': None, 'n_estimators': 50}
