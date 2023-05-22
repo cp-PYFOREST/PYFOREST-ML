@@ -37,6 +37,16 @@ LUP_YEAR = [
     os.path.join(SERVER_PATH, 'ml_data', 'lup_subsets',  'lup_10.gpkg')
 ]
 
+# River Data
+ROAD_PATH = [
+    os.path.join(SERVER_PATH, 'ml_data', 'features', 'dissolved_road', 'dissolved_road.gpkg')
+]
+
+# Road Data
+RIVER_PATH = [
+    os.path.join(SERVER_PATH, 'ml_data', 'features', 'river_buffer', 'river_buffer.gpkg')
+]
+
 # Where to save outputs
 OUTPUT_PATH = [
     os.path.join(SERVER_PATH, 'ml_data', 'output')
