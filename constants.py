@@ -47,6 +47,10 @@ RIVER_PATH = [
     os.path.join(SERVER_PATH, 'ml_data', 'features', 'river_buffer', 'river_buffer.gpkg')
 ]
 
+# Soil Data
+SOIL_RASTER = os.path.join(SERVER_PATH, 'ml_data','features', 'soil',  'merged_soil.tif')
+
+
 # Where to save outputs
 OUTPUT_PATH = [
     os.path.join(SERVER_PATH, 'ml_data', 'output')
@@ -54,6 +58,8 @@ OUTPUT_PATH = [
 
 
 LUP_LUT_RASTER = os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters', 'land_use_type', 'lup_10_land_use_type_raster.tif')
+
+
 
 # The folder masked rasters contains the required files for the machine learning model. deforestation11_20_masked.tif is alway the 'y' target variable
 
