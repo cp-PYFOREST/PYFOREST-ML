@@ -69,7 +69,12 @@ TREECOVER_PERCENTAGE_10 =  os.path.join(SERVER_PATH, 'ml_data','output', 'tree_c
 
 # The folder masked rasters contains the required files for the machine learning model. deforestation11_20_masked.tif is alway the 'y' target variable
 
-# Base feature stacks
+#  Masked with LUP still need to mask with treecover2010
 MASKED_RASTERS_DIR = [
     os.path.join(OUTPUT_PATH[0], 'masked_rasters')
+    ]
+
+# Feature Files
+FEATURES_DIR = [
+    os.path.join(OUTPUT_PATH[0], 'tree_masked_rasters')
     ]
