@@ -19,6 +19,11 @@ HANSEN_LOSSYEAR_FILEPATHS = [
     os.path.join(SERVER_PATH, 'ml_data', 'raw_hansen', 'lossyear.tiff')
 ]
 
+
+# raw earth engine data 
+PRECIPITATION_FILEPATH = os.path.join(SERVER_PATH, 'ml_data', 'raw_CHIRPS', 'average_annual_precipitation.tif')
+
+
 # loss year in binary for year of deforestation 2011-2020
 DEFORESTATION_1120_PATH = os.path.join(SERVER_PATH, 'ml_data', 'output', 'deforestation-cumulative_0110', 'deforestation11_20.tif')
 
@@ -63,9 +68,7 @@ ROAD_DISTANCE_RASTER =  os.path.join(SERVER_PATH, 'ml_data','output', 'processed
 
 RIVER_DISTANCE_RASTER =  os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters', 'river_raster', 'river_raster.tif')
 
-DEFORESTATION_0110_PATH = os.path.join(SERVER_PATH, 'ml_data', 'output', 'deforestation-cumulative_0110', 'deforestation1_10.tif')
 
-TREECOVER_PERCENTAGE_10 =  os.path.join(SERVER_PATH, 'ml_data','output', 'tree_cover_10_percent_and_above_00', 'tree_cover_10_percent_and_above_00.tif')
 
 # The folder masked rasters contains the required files for the machine learning model. deforestation11_20_masked.tif is alway the 'y' target variable
 
