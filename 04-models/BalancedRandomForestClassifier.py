@@ -3,7 +3,7 @@
 
 # # Import Libraries and Constants
 
-# In[7]:
+# In[3]:
 
 
 import os
@@ -25,12 +25,21 @@ from sklearn.model_selection import (train_test_split, cross_val_score,
 from scipy.stats import randint as sp_randint
 
 from imblearn.ensemble import BalancedRandomForestClassifier
-from sklearn.externals import joblib
+import joblib
+from joblib import dump
 
 
+# In[22]:
 
 
-# In[8]:
+# import warnings filter
+from warnings import simplefilter
+# ignore all future warnings
+simplefilter(action='ignore', category=UserWarning)
+simplefilter(action='ignore', category=FutureWarning)
+
+
+# In[4]:
 
 
 # Get the current working directory
@@ -46,13 +55,13 @@ sys.path.append(project_root)
 
 
 
-# In[9]:
+# In[5]:
 
 
 from constants import SERVER_PATH, OUTPUT_PATH, MASKED_RASTERS_DIR, FEATURES_DIR
 
 
-# In[10]:
+# In[6]:
 
 
 #output- update this for subsequent runs
@@ -63,7 +72,7 @@ output_folder = os.path.join(OUTPUT_PATH[0], 'basic_rf_model')
 
 # # Create Stack
 
-# In[11]:
+# In[7]:
 
 
 # helper function to read tiff files
@@ -72,11 +81,11 @@ def read_tiff_image(file_path):
         return src.read(1)
 
 
-# In[12]:
+# In[8]:
 
 
 # List of paths to the raster files to be used as features
-feature_files = [os.path.join(FEATURES_DIR[0], file_name) for file_name in os.listdir(FEATURES_DIR[0])]
+feature_files = [os.path.join(FEATURES_DIR[0], 'lup_10_treemask.tif')]
 
 # Then you can use this list of feature_files to create feature_data_arrays and feature_data_flat:
 feature_data_arrays = [read_tiff_image(file_path) for file_path in feature_files]
@@ -86,19 +95,19 @@ feature_data_flat = [data_array.flatten() for data_array in feature_data_arrays]
 y_file = os.path.join(MASKED_RASTERS_DIR[0], 'deforestation11_20_masked.tif')
 
 
-# In[13]:
+# In[9]:
 
 
 feature_files
 
 
-# In[14]:
+# In[10]:
 
 
 y_file
 
 
-# In[15]:
+# In[11]:
 
 
 # Find the dimensions of all the raster data arrays
@@ -118,7 +127,7 @@ else:
 
 # # Stack and Flatten Data
 
-# In[16]:
+# In[12]:
 
 
 # NoData Value
@@ -160,7 +169,7 @@ y_cleaned = y[valid_rows]
 # 
 # **NoData values have been removed:** You should confirm that there are no NoData values in your cleaned data. This can be done by asserting that there are no occurrences of no_data_value in X_cleaned and y_cleaned.
 
-# In[17]:
+# In[13]:
 
 
 assert not (X_cleaned == no_data_value).any()
@@ -171,7 +180,7 @@ assert not (y_cleaned == no_data_value).any()
 # 
 # **Dimensions are correct:** The shapes of X_cleaned and y_cleaned should match along the row dimension (the first dimension for 2D array X_cleaned and the only dimension for 1D array y_cleaned).
 
-# In[18]:
+# In[14]:
 
 
 print("Shape of X_cleaned:", X_cleaned.shape)
@@ -182,7 +191,7 @@ print("Shape of y_cleaned:", y_cleaned.shape)
 # 
 # **Confirm that the valid rows have been correctly identified:** You can do this by checking that the number of True values in valid_rows equals the number of rows in X_cleaned (or the number of elements in y_cleaned).
 
-# In[19]:
+# In[15]:
 
 
 assert valid_rows.sum() == X_cleaned.shape[0]
@@ -191,13 +200,13 @@ assert valid_rows.sum() == X_cleaned.shape[0]
 # # Split the data into training and testing sets
 # 
 
-# In[20]:
+# In[16]:
 
 
 X_train, X_test, y_train, y_test = train_test_split(X_cleaned, y_cleaned, test_size=0.3, random_state=42, stratify=y_cleaned)
 
 
-# In[21]:
+# In[17]:
 
 
 print("Shape of y_test:", y_test.shape)
@@ -205,7 +214,7 @@ print("Shape of y_test:", y_test.shape)
 
 # # Class Balance Check
 
-# In[22]:
+# In[18]:
 
 
 # Create pandas Series from your labels
@@ -221,39 +230,11 @@ print("Whole dataset balance:\n", y_cleaned_series.value_counts(normalize=True))
 
 # The balance of your dataset seems to be roughly the same in both the training and testing sets, with about 80.6% of the instances belonging to class 0 (no deforestation) and 19.3% to class 1 (deforestation). This shows that the classes are quite imbalanced. Machine learning algorithms, including Random Forest, may have a bias towards the majority class in such situations, which could be one of the reasons why your model is not performing well on the minority class.
 
-# In[23]:
-
-
-# Create a list to hold your feature file paths
-
-
-# Define the labels for your features
-feature_labels = ['LUP_10', 'Precipitation', 'River','Road', 'Soil']
-
-
-
-'''    
-for i, feature in enumerate(feature_labels):
-    unique_values, counts = np.unique(X_cleaned[:, i], return_counts=True)
-    
-    # Print the counts for each unique value
-    for value, count in zip(unique_values, counts):
-        print(f'{feature} Value: {value}, Count: {count}')
-
-    print('-----------------')
-    
-    # Plot histogram
-    plt.figure(figsize=(10, 6))
-    plt.hist(X_cleaned[:, i], bins=20)
-    plt.title(f'{feature} Distribution')
-    plt.xlabel('Values')
-    plt.ylabel('Counts')
-    plt.show()'''
 
 
 # # Random Forest model using BalancedRandomForestClassifier:
 
-# In[24]:
+# In[20]:
 
 
 brfc = BalancedRandomForestClassifier(random_state=42, class_weight= 'balanced', sampling_strategy='not majority')
@@ -266,13 +247,14 @@ param_grid = {
 
 # Define a basic parameter grid
 param_grid = {
-    'n_estimators': [50, 100, 200],  # number of trees in the forest
-    'max_features': ['sqrt'],
-    'max_depth': [None, 50, 100, 150, 200], # maximum depth of the tree
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4],
-    'bootstrap': [True, False]
+    'n_estimators': [40, 50, 60],      # number of trees in the forest
+    'max_depth': [150, 200, 250],        # maximum depth of the tree
+    'min_samples_split': [4, 6, 8],    # Minimum number of samples required to split a node
+    'min_samples_leaf': [1, 2, 3],     # Minimum number of samples required to split a node
+    'bootstrap': [False]      # Method of selecting samples for training each tree
 }
+
+
 
 # Set scoring metrics
 scoring = {
@@ -282,8 +264,21 @@ scoring = {
     'roc_auc': 'roc_auc'
 }
 
+# Create the RandomizedSearchCV object
+random_search = RandomizedSearchCV(
+    estimator = brfc,
+    param_distributions=param_grid,
+    scoring=scoring,
+    refit='f1',  # because we are interested in maximizing f1_score
+    cv=5,
+    n_jobs=30,
+    verbose=0,
+    n_iter=15,  # number of parameter settings that are sampled
+    random_state=42  # for reproducibility
+)
+
 # Create the GridSearchCV object
-grid_search = GridSearchCV(
+'''random_search = GridSearchCV(
     estimator = brfc,
     param_grid=param_grid,
     scoring=scoring,
@@ -291,57 +286,47 @@ grid_search = GridSearchCV(
     cv=5,
     n_jobs=19,
     verbose=0
-)
+)'''
 
 
 
-# In[ ]:
+# In[23]:
 
 
 # Fit GridSearch to the BalancedRandomForestClassifier data
-grid_search.fit(X_train, y_train)
+#random_search.fit(X_train, y_train)
+random_search.fit(X_train, y_train)
+
 #Fitting 5 folds for each of 12 candidates, totalling 60 fits
-joblib.dump(random_search, 'random_search_results.pkl')
 
 
-# In[ ]:
 
 
-'''def is_fitted(estimator):
-    try:
-        getattr(estimator, "estimators_")
-        return True
-    except AttributeError:
-        return False
-
-print(is_fitted(brfc))
-'''
-
-# In[21]:
+# In[2]:
 
 
-grid_search.score
+random_search.score
 
 
-# In[22]:
+# In[3]:
 
 
 # Get the best parameters and the corresponding score
-best_params = grid_search.best_params_
-best_score = grid_search.best_score_
+best_params = random_search.best_params_
+best_score = random_search.best_score_
 
-best_estimator = grid_search.best_estimator_
+best_estimator = random_search.best_estimator_
 
-cv_results = grid_search.cv_results_
+cv_results = random_search.cv_results_
 
-cv_results_df = pd.DataFrame(grid_search.cv_results_)
+cv_results_df = pd.DataFrame(random_search.cv_results_)
 
-scorer = grid_search.scorer_
+scorer = random_search.scorer_
 
-refit_time = grid_search.refit_time_
+refit_time = random_search.refit_time_
 
 
-# In[44]:
+# In[ ]:
 
 
 print("Best parameters:", best_params)
@@ -356,13 +341,13 @@ print("Refit time (seconds):", refit_time)
 # # Model evaluation performance  metrics 
 # e.g., confusion matrix, classification report, accuracy, F1-score, etc.
 
-# In[24]:
+# In[ ]:
 
 
-best_model = grid_search.best_estimator_
+best_model = random_search.best_estimator_
 
 
-# In[25]:
+# In[ ]:
 
 
 # Predictions for test data
@@ -371,7 +356,7 @@ y_pred = best_model.predict(X_test)
 
 # # TESTING DATA Classificatin Report-Confusion Matrix
 
-# In[26]:
+# In[ ]:
 
 
 # Calculate accuracy
@@ -386,24 +371,16 @@ print("F1-score:", f1)
 report = classification_report(y_test, y_pred)
 print("Classification report:\n", report)
 
-
-# In[29]:
-
-'''
-ConfusionMatrixDisplay.from_predictions(y_test, y_pred)
-plt.show()
-
-'''
 # # TRAINING DATA Classificatin Report-Confusion Matrix
 
-# In[27]:
+# In[ ]:
 
 
 # Predictions for train data
 y_pred_train = best_model.predict(X_train)
 
 
-# In[28]:
+# In[ ]:
 
 
 # Confusion matrix and classification report for train data
@@ -417,26 +394,6 @@ print(train_cr)
 
 # In[ ]:
 
-'''
-from sklearn.metrics import ConfusionMatrixDisplay
-disp = ConfusionMatrixDisplay.from_estimator(
-        brfc,
-        X_test,
-        y_test,
-        cmap=plt.cm.Blues)
-
-title = disp.ax_.set_title("Confusion matrix")
-
-print(title)
-print(disp.confusion_matrix)
-
-plt.show()'''
-
-
-# # Feature Importance
-
-# In[33]:
-
 
 # Calculate feature importances and the standard deviation for those importances
 importances = best_model.feature_importances_
@@ -448,72 +405,48 @@ feature_names = ['LUP_10', 'Precipitation', 'River','Road', 'Soil']
 # Create a sorted list of tuples containing feature names and their importances:
 sorted_features = sorted(zip(feature_names, importances, std), key=lambda x: x[1], reverse=True)
 
-'''# Create a bar chart
-fig, ax = plt.subplots()
 
-# Set the feature names as x-axis labels
-ax.set_xticklabels([item[0] for item in sorted_features], rotation=45, ha='right')
-ax.set_xticks(range(len(sorted_features)))
 
-# Set the y-axis labels as importances
-ax.bar(range(len(sorted_features)), [item[1] for item in sorted_features], yerr=[item[2] for item in sorted_features])
 
-# Set the title and labels for the chart
-ax.set_title('Feature Importances')
-ax.set_xlabel('Features')
-ax.set_ylabel('Importance')
-
-# Display the chart
-plt.tight_layout()
-plt.show()'''
 
 
 # # Probabilities for deforestation
 
-# In[43]:
+# In[ ]:
 
 
 y_proba_curve = best_model.predict_proba(X_test)[:, 1]
 
 
-# In[46]:
+# In[ ]:
 
 
 print("Shape of y_proba_curve:", y_proba_curve.shape)
 
 
-# In[47]:
+# In[ ]:
 
 
-'''# Precision-Recall curve
+# Precision-Recall curve
 precision, recall, _ = precision_recall_curve(y_test, y_proba_curve)
-plt.plot(recall, precision, marker='.', label='Random Forest')
-plt.xlabel('Recall')
-plt.ylabel('Precision')
-plt.legend()
-plt.show()
+
 
 print(f"Area under Precision-Recall curve: {auc(recall, precision)}")
 
 # ROC curve
 fpr, tpr, _ = roc_curve(y_test, y_proba_curve)
-plt.plot(fpr, tpr, marker='.', label='Random Forest')
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.legend()
-plt.show()
 
 print(f"Area under ROC curve: {auc(fpr, tpr)}")
 
-'''
-# In[34]:
+
+# In[ ]:
 
 
 # Predict probabilities for deforestation events
 y_proba = best_model.predict_proba(X_cleaned)[:, 1]
 
 
-# In[35]:
+# In[ ]:
 
 
 # Predicts the 
@@ -523,20 +456,31 @@ prob_raster[valid_rows] = y_proba
 prob_raster = prob_raster.reshape(feature_data_arrays[0].shape)
 
 
-# In[48]:
+# In[ ]:
 
 
 print(y_proba.shape)
+try:
+    joblib.dump(random_search, 'random_search_results.pkl')
+    joblib.dump(best_params, 'best_params.pkl')
+    joblib.dump(best_score, 'best_score.pkl')
+    joblib.dump(best_model, 'best_model.pkl')
+    joblib.dump(cv_results, 'cv_results.pkl')
+    joblib.dump(cv_results_df, 'cv_results_df.pkl')
+    joblib.dump(scorer, 'scorer.pkl')
+    joblib.dump(refit_time, 'refit_time.pkl')
+    joblib.dump(report, 'report.pkl')
+except Exception as e:
+    print(f"An error occurred: {e}")
 
-
-# In[50]:
+# In[ ]:
 
 
 # Save the probability raster as a GeoTIFF file
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
 
-output_file = os.path.join(output_folder, "deforestation_prob_balanced.tiff")
+output_file = os.path.join(output_folder, "deforestation_prob_brfc.tiff")
 
 with rasterio.open(y_file) as src:
     profile = src.profile
@@ -548,7 +492,71 @@ with rasterio.open(output_file, 'w', **profile) as dst:
     dst.write_band(1, prob_raster_reshaped[0])
 
 
+# Report
+model_report = f'''Balanced Random Forest Classifier Model Report
 
+# Summary 
+The Balanced Random Forest Classifier performed reasonably well on this task, 
+with an accuracy of  {accuracy} and an F1-score of {f1}. 
+However, there is room for improvement, particularly in the precision and recall for class 1. 
+Future work could explore different models, additional feature engineering, or further hyperparameter tuning to improve performance.
+
+# Model Selection
+We chose to use a Balanced Random Forest Classifier for this task. 
+This model is an ensemble method that combines the predictions of several base estimators 
+built with a given learning algorithm in order to improve generalizability and robustness over a single estimator. 
+It also handles imbalanced classes, which is a common problem in many machine learning tasks.
+
+Hyperparameter Tuning
+We used RandomizedSearchCV for hyperparameter tuning. 
+This method performs a random search on hyperparameters, which is more efficient than an exhaustive search like GridSearchCV.
+
+The hyperparameters we tuned were:
+
+'n_estimators': The number of trees in the forest.
+'max_depth': The maximum depth of the tree.
+'min_samples_split': The minimum number of samples required to split a node.
+'min_samples_leaf': The minimum number of samples required at a leaf node.
+'bootstrap': Whether bootstrap samples are used when building trees.
+
+{param_grid}
+
+# Model Performance
+The best parameters found by RandomizedSearchCV were:
+
+Best parameters:, {best_params}
+
+
+
+With these parameters, the model achieved the following performance metrics:
+Best cross-validation score: {best_score}
+Best model:, {best_estimator}
+Scorer function:, {scorer}
+Refit time (seconds): {refit_time}
+Accuracy:, {accuracy}
+F1-score: {f1}
+# Testing Data
+Classification report:
+ {report}
+
+#  TRAINING DATA Classificatin Report-Confusion Matrix
+
+Training confusion matrix:
+{train_cm}
+Training classification report:
+{train_cr}
+
+
+This indicates that the model correctly classified [1,1] instances of class 0 and [2,2] instances of class 1, 
+while misclassifying [1,2] instances of class 0 and [2,1] instances of class 1.
+
+CV Results:
+{cv_results_df}
+
+'''
+# Write the report to a Quarto markdown file
+with open('model_report.qmd', 'w') as f:
+    f.write(model_report)
 
 # # Tuning Strategies
 
