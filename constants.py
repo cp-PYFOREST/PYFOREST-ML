@@ -55,6 +55,8 @@ RIVER_PATH = [
 # Soil Data
 SOIL_RASTER = os.path.join(SERVER_PATH, 'ml_data','features', 'soil',  'merged_soil.tif')
 
+# Simulated  land use plans
+SIMULATED_LUP_PATH =  os.path.join (SERVER_PATH, 'lup_simulation_data', 'simulation_results', 'optimal_mock_properties')
 
 # Where to save outputs
 OUTPUT_PATH = [
@@ -68,7 +70,8 @@ ROAD_DISTANCE_RASTER =  os.path.join(SERVER_PATH, 'ml_data','output', 'processed
 
 RIVER_DISTANCE_RASTER =  os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters', 'river_raster', 'river_raster.tif')
 
-
+# Rasters of simulated land use plans
+SIM_LUP_RASTER_PATH = [os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters','land_type')]
 
 # The folder masked rasters contains the required files for the machine learning model. deforestation11_20_masked.tif is alway the 'y' target variable
 
@@ -78,6 +81,11 @@ MASKED_RASTERS_DIR = [
     ]
 
 # Feature Files
+# Training Model
 FEATURES_DIR = [
     os.path.join(OUTPUT_PATH[0], 'tree_masked_rasters')
+    ]
+# Simulated Land use Plans to project model
+SIMULATION_FEATURES_DIR = [
+    os.path.join(OUTPUT_PATH[0], 'sim_lup_features')
     ]
