@@ -10,6 +10,8 @@ SERVER_PATH = os.path.join('/Users', 'romero61', '..', '..', 'capstone', 'pyfore
 # The larger study area to use for earth engine this study uses the western region of paraguay
 STUDY_BOUNDARY_PATH = os.path.join(SERVER_PATH,'ml_data', 'study_boundary', 'study_boundary.shp')
 
+
+# RAW DATA
 # raw earth engine data
 HANSEN_TREECOVER_FILEPATH = [
     os.path.join(SERVER_PATH, 'ml_data', 'raw_hansen', 'treecover2000.tif')
@@ -23,6 +25,10 @@ HANSEN_LOSSYEAR_FILEPATHS = [
 # raw earth engine data 
 PRECIPITATION_FILEPATH = os.path.join(SERVER_PATH, 'ml_data', 'raw_CHIRPS', 'average_annual_precipitation.tif')
 
+# raw Nelson data of distance to cities and ports
+PORTS_FILEPATH = os.path.join(SERVER_PATH, 'ml_data', 'raw_nelson', 'travel_time_to_ports_5.tif')
+
+CITIES_FILEPATH = os.path.join(SERVER_PATH, 'ml_data', 'raw_nelson', 'travel_time_to_cities_12.tif')
 
 # loss year in binary for year of deforestation 2011-2020
 DEFORESTATION_1120_PATH = os.path.join(SERVER_PATH, 'ml_data', 'output', 'deforestation-cumulative_0110', 'deforestation11_20.tif')
@@ -63,6 +69,7 @@ OUTPUT_PATH = [
     os.path.join(SERVER_PATH, 'ml_data', 'output')
 ]
 
+# PROCESSED DATA 1
 # Rasters Not yet masked and cropped w/ nodata value of -1
 LUP_LUT_RASTER = os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters', 'land_use_type', 'lup_10_land_use_type_raster.tif')
 
@@ -70,11 +77,17 @@ ROAD_DISTANCE_RASTER =  os.path.join(SERVER_PATH, 'ml_data','output', 'processed
 
 RIVER_DISTANCE_RASTER =  os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters', 'river_raster', 'river_raster.tif')
 
+PORT_DISTANCE_RASTER =  os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters', 'nelson', 'ports_masked.tif')
+
+CITIES_DISTANCE_RASTER =  os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters', 'nelson', 'cities_masked.tif')
+
 # Rasters of simulated land use plans
 SIM_LUP_RASTER_PATH = [os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters','land_type')]
 
-# The folder masked rasters contains the required files for the machine learning model. deforestation11_20_masked.tif is alway the 'y' target variable
 
+# PROCESSED DATA 2 
+# The folder masked rasters contains the required files for the machine learning model. 
+# deforestation11_20_masked.tif is alway the 'y' target variable
 #  Masked with LUP still need to mask with treecover2010
 MASKED_RASTERS_DIR = [
     os.path.join(OUTPUT_PATH[0], 'masked_rasters')
@@ -85,7 +98,7 @@ MASKED_RASTERS_DIR = [
 FEATURES_DIR = [
     os.path.join(OUTPUT_PATH[0], 'tree_masked_rasters')
     ]
-# Simulated Land use Plans to project model
+# Simulated Land use Plans to Predict
 SIMULATION_FEATURES_DIR = [
     os.path.join(OUTPUT_PATH[0], 'sim_lup_features')
     ]
