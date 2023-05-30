@@ -69,6 +69,7 @@ OUTPUT_PATH = [
     os.path.join(SERVER_PATH, 'ml_data', 'output')
 ]
 
+
 # PROCESSED DATA 1
 # Rasters Not yet masked and cropped w/ nodata value of -1
 LUP_LUT_RASTER = os.path.join(SERVER_PATH, 'ml_data','output', 'processed_rasters', 'land_use_type', 'lup_10_land_use_type_raster.tif')
@@ -101,4 +102,4 @@ FEATURES_DIR = [
 # Simulated Land use Plans to Predict
 SIMULATION_FEATURES_DIR = [
     os.path.join(OUTPUT_PATH[0], 'sim_lup_features')
-    ]
+]
