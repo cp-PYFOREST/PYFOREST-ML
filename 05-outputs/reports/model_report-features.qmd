@@ -1,4 +1,38 @@
-
+---
+title: “Model Metrics”
+author: “Guillermo Romero”
+date: today
+format:
+  pdf:
+      toc: false
+      shift-heading-level-by: 2
+      fig-pos: “H”
+      fig-cap-location: top
+      geometry:
+        - top=1in
+        - right=.8in
+        - bottom=1in
+        - left=.8in
+      link-citations: yes
+      linkcolor: blue
+      include-in-header:
+        text: |
+          \usepackage{fancyhdr}
+          \usepackage{titling}
+          \pagestyle{fancy}
+          \fancyhf{}
+          \renewcommand\maketitle{
+            \fancyhead[C]{
+              \thetitle
+              \ifx \theauthor\empty  \else \ – \theauthor \fi
+              \ifx \thedate\empty  \else \ – \thedate \ \fi
+            }
+          }
+          \fancyfoot[C]{\thepage}
+editor:
+  markdown:
+    wrap: sentence
+---
 
 Balanced Random Forest Classifier Model Report
 
@@ -6,27 +40,13 @@ Balanced Random Forest Classifier Model Report
 
 The Balanced Random Forest Classifier performed reasonably well on this task, 
 with an accuracy of  0.9420814018196827 and an F1-score of 0.9421358513964577. 
-However, there is room for improvement, particularly in the precision and recall for class 1. 
-Future work could explore different models, additional feature engineering, or further hyperparameter tuning to improve performance.
+
 
 # Model Selection
 
-We chose to use a Balanced Random Forest Classifier for this task. 
-This model is an ensemble method that combines the predictions of several base estimators 
-built with a given learning algorithm in order to improve generalizability and robustness over a single estimator. 
-It also handles imbalanced classes, which is a common problem in many machine learning tasks.
-
-Hyperparameter Tuning
-We used RandomizedSearchCV for hyperparameter tuning. 
-This method performs a random search on hyperparameters, which is more efficient than an exhaustive search like GridSearchCV.
 
 The hyperparameters we tuned were:
 
-'n_estimators': The number of trees in the forest.
-'max_depth': The maximum depth of the tree.
-'min_samples_split': The minimum number of samples required to split a node.
-'min_samples_leaf': The minimum number of samples required at a leaf node.
-'bootstrap': Whether bootstrap samples are used when building trees.
 
 {'n_estimators': [50, 100, 200], 'max_depth': [None, 5, 10, 20]}
 
@@ -39,11 +59,7 @@ Best parameters:, {'n_estimators': 50, 'max_depth': None}
 
 With these parameters, the model achieved the following performance metrics:
 Best cross-validation score: 0.8805888260748811
-Best model:, BalancedRandomForestClassifier(class_weight='balanced', n_estimators=50,
-                               random_state=42,
-                               sampling_strategy='not majority')
-Scorer function:, {'precision': make_scorer(precision_score, average=binary), 'recall': make_scorer(recall_score, average=binary), 'f1': make_scorer(f1_score, average=binary), 'roc_auc': make_scorer(roc_auc_score, needs_threshold=True)}
-Refit time (seconds): 356.84904623031616
+
 Accuracy:, 0.9420814018196827
 F1-score: 0.9421358513964577
 
@@ -81,10 +97,10 @@ weighted avg       1.00      1.00      1.00   2911289
 
 
 
-This indicates that the model correctly classified [1,1] instances of class 0 
-and [2,2] instances of class 1, 
+This indicates that the model correctly classified 2167159 instances of class 0 
+and 731728 instances of class 1, 
 
-while misclassifying [1,2] instances of class 0 and [2,1] instances of class 1.
+while misclassifying 10113 instances of class 0 and 2289 instances of class 1.
 
 CV Results:
    mean_fit_time  std_fit_time  mean_score_time  std_score_time  \

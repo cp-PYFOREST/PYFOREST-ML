@@ -1,0 +1,686 @@
+```{r}
+library(tidyverse)
+library(ggthemr)
+library(plotly)
+library(flextable)
+```
+
+```{r}
+area_by_department_land_use <- readRDS('/Users/romero61/../../capstone/pyforest/shinydata/simulation/bar_plot_datasets/area_by_department_land_use.rds')
+
+area_by_district_land_use <- readRDS('/Users/romero61/../../capstone/pyforest/shinydata/simulation/bar_plot_datasets/area_by_district_land_use.rds')
+
+
+area_pct_by_department_land_use <- readRDS('/Users/romero61/../../capstone/pyforest/shinydata/simulation/bar_plot_datasets/area_pct_by_department_land_use.rds')
+
+area_pct_by_district_land_use <- readRDS('/Users/romero61/../../capstone/pyforest/shinydata/simulation/bar_plot_datasets/area_pct_by_district_land_use.rds')
+```
+
+```{r}
+combined_data <- read_rds('/Users/romero61/../../capstone/pyforest/shinydata/simulation/combined_sim_results.rds')
+combined_data
+color_mapping <- c(
+  "forest_reserve" = "#4B5F43",  # Hunter Green
+  "LandUseType2" = "#AEBD93",  # Sage
+  "LandUseType3" = "#2F4858",  # Charcoal (dark blue)
+  "LandUseType4" = "#33658A",  # Lapis Lazuli (blue)
+  "riparian_corridor" = "#A7C7D8",  # Columbia blue
+  "LandUseType6" = "#F6AE2D",  # Hunyadi yellow
+  "paddocks" = "#F26419",  # Orange (Pantone)
+  "LandUseType8" = "#F8F7F1"   # Light gray
+)
+```
+
+```{r}
+
+
+color_mapping <- c(
+  "fr_area" = "#4B5F43",  # Hunter Green
+  "hedgerow_area" = "#AEBD93",  # Sage
+  "riparian_area" = "#A7C7D8",  # Columbia blue
+  "paddocks_area" = "#F6AE2D"  # Orange (Pantone)
+)
+
+# Define the legend labels
+legend_labels <- c(
+  "fr_area" = "Forest Reserve",
+  "hedgerow_area" = "Hedgerows",
+  "riparian_area" = "Riparian Corridor",
+  "paddocks_area" = "Paddocks"
+)
+
+
+test <- area_by_department_land_use  |>
+  group_by(simulation, land_use_type) |>
+  summarize(area_forest_conserved = sum(total_area_lu, na.rm = TRUE)) %>%
+      arrange(-area_forest_conserved) %>%
+      mutate(simulation = factor(
+        simulation,
+        levels = c(
+          "50% Forest Reserve",
+          "5% Forest Reserve",
+          "Hedgerow incl. 25% Forest Reserve",
+          "25% Forest Reserve"
+        )
+      )) |> 
+  filter(simulation == "25% Forest Reserve" | simulation == "50% Forest Reserve")
+
+# Reorder the factor levels
+test$land_use_type <- factor(test$land_use_type, levels = c("paddocks_area", "hedgerow_area", "riparian_area","fr_area"))
+# Shorten the simulation names
+levels(test$simulation) <- c("Business as Usual", "Forest Conservation","Economic Development","Law Ambiguity") 
+
+
+plot <-
+  ggplot(test,
+         aes(y = area_forest_conserved, x = simulation, fill = land_use_type)) +
+  geom_bar(
+    stat = 'identity',
+    position = 'stack',
+    color = "black",
+    linewidth = 0.25
+  ) +
+  labs(fill = "Land Use Type") +
+  scale_fill_manual(values = color_mapping,labels = legend_labels) +
+  guides(fill = guide_legend(override.aes = list(size = 36))) +  # Increase the size of the legend keys
+  theme_minimal() +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),  # Center the title
+        plot.background = element_rect(fill = "transparent"),  # Make the background transparent
+        axis.title.y = element_blank(),  # Remove y-axis title
+        axis.text.y = element_blank(),  # Remove y-axis text
+        axis.ticks.y = element_blank(),  # Remove y-axis ticks
+        axis.title.x = element_blank(),  # Remove x-axis title
+        axis.text.x = element_blank(),  # Remove x-axis text
+        axis.ticks.x = element_blank(),  # Remove x-axis ticks
+        legend.text = element_text(size = 24),
+        legend.title = element_text(size = 24)) + 
+  coord_flip()  # Flip the coordinates
+
+
+
+
+
+
+plot
+#ggsave('~/github/Land-Use-Plan-Simulation/img/sim25_50.png', bg = 'transparent', width = 16, height = 9)
+```
+
+```{r}
+
+color_mapping <- c(
+  "fr_area" = "#4B5F43",  # Hunter Green
+  "hedgerow_area" = "#AEBD93",  # Sage
+  "riparian_area" = "#A7C7D8",  # Columbia blue
+  "paddocks_area" = "#F6AE2D"  # Orange (Pantone)
+)
+
+# Define the legend labels
+legend_labels <- c(
+  "fr_area" = "Forest Reserve",
+  "hedgerow_area" = "Hedgerows",
+  "riparian_area" = "Riparian Corridor",
+  "paddocks_area" = "Paddocks"
+)
+
+
+test <- area_by_department_land_use  |>
+  group_by(simulation, land_use_type) |>
+  summarize(area_forest_conserved = sum(total_area_lu, na.rm = TRUE)) %>%
+      arrange(-area_forest_conserved) %>%
+      mutate(simulation = factor(
+        simulation,
+        levels = c(
+          "50% Forest Reserve",
+          "5% Forest Reserve",
+          "Hedgerow incl. 25% Forest Reserve",
+          "25% Forest Reserve"
+        )
+      )) |> 
+  filter(simulation == "25% Forest Reserve" | simulation == "5% Forest Reserve")
+
+# Reorder the factor levels
+test$land_use_type <- factor(test$land_use_type, levels = c("paddocks_area", "hedgerow_area", "riparian_area","fr_area"))
+# Shorten the simulation names
+levels(test$simulation) <- c("Business as Usual", "Forest Conservation","Economic Development","Law Ambiguity") 
+
+plot <-
+  ggplot(test,
+         aes(y = area_forest_conserved, x = simulation, fill = land_use_type)) +
+  geom_bar(
+    stat = 'identity',
+    position = 'stack',
+    color = "black",
+    linewidth = 0.25
+  ) +
+  labs(fill = "Land Use Type") +
+  scale_fill_manual(values = color_mapping,labels = legend_labels) +
+  guides(fill = guide_legend(override.aes = list(size = 36))) +  # Increase the size of the legend keys
+  theme_minimal() +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),  # Center the title
+        plot.background = element_rect(fill = "transparent"),  # Make the background transparent
+        axis.title.y = element_blank(),  # Remove y-axis title
+        axis.text.y = element_blank(),  # Remove y-axis text
+        axis.ticks.y = element_blank(),  # Remove y-axis ticks
+        axis.title.x = element_blank(),  # Remove x-axis title
+        axis.text.x = element_blank(),  # Remove x-axis text
+        axis.ticks.x = element_blank(),  # Remove x-axis ticks
+        legend.text = element_text(size = 24),
+        legend.title = element_text(size = 24)) + 
+  coord_flip()  # Flip the coordinates
+
+plot
+#ggsave('~/github/Land-Use-Plan-Simulation/img/sim25_5.png', bg = 'transparent', width = 16, height = 9)
+```
+
+
+```{r}
+
+color_mapping <- c(
+  "fr_area" = "#4B5F43",  # Hunter Green
+  "hedgerow_area" = "#AEBD93",  # Sage
+  "riparian_area" = "#A7C7D8",  # Columbia blue
+  "paddocks_area" = "#F6AE2D"  # Orange (Pantone)
+)
+
+# Define the legend labels
+legend_labels <- c(
+  "fr_area" = "Forest Reserve",
+  "hedgerow_area" = "Hedgerows",
+  "riparian_area" = "Riparian Corridor",
+  "paddocks_area" = "Paddocks"
+)
+
+
+test <- area_by_department_land_use  |>
+  group_by(simulation, land_use_type) |>
+  summarize(area_forest_conserved = sum(total_area_lu, na.rm = TRUE)) %>%
+      arrange(-area_forest_conserved) %>%
+      mutate(simulation = factor(
+        simulation,
+        levels = c(
+          "50% Forest Reserve",
+          "5% Forest Reserve",
+          "Hedgerow incl. 25% Forest Reserve",
+          "25% Forest Reserve"
+        )
+      )) |> 
+  filter(simulation == "25% Forest Reserve" | simulation == "Hedgerow incl. 25% Forest Reserve")
+
+# Reorder the factor levels
+test$land_use_type <- factor(test$land_use_type, levels = c("paddocks_area", "hedgerow_area", "riparian_area","fr_area"))
+# Shorten the simulation names
+levels(test$simulation) <- c("Business as Usual", "Forest Conservation","Economic Development","Law Ambiguity") 
+
+plot <-
+  ggplot(test,
+         aes(y = area_forest_conserved, x = simulation, fill = land_use_type)) +
+  geom_bar(
+    stat = 'identity',
+    position = 'stack',
+    color = "black",
+    linewidth = 0.25
+  ) +
+  labs(fill = "Land Use Type") +
+  scale_fill_manual(values = color_mapping,labels = legend_labels) +
+  guides(fill = guide_legend(override.aes = list(size = 36))) +  # Increase the size of the legend keys
+  theme_minimal() +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),  # Center the title
+        plot.background = element_rect(fill = "transparent"),  # Make the background transparent
+        axis.title.y = element_blank(),  # Remove y-axis title
+        axis.text.y = element_blank(),  # Remove y-axis text
+        axis.ticks.y = element_blank(),  # Remove y-axis ticks
+        axis.title.x = element_blank(),  # Remove x-axis title
+        axis.text.x = element_blank(),  # Remove x-axis text
+        axis.ticks.x = element_blank(),  # Remove x-axis ticks
+        legend.text = element_text(size = 24),
+        legend.title = element_text(size = 24)) + 
+  coord_flip()  # Flip the coordinates
+
+plot
+ggsave('~/github/Land-Use-Plan-Simulation/img/sim25_hedge.png', bg = 'transparent', width = 16, height = 9)
+```
+
+
+```{r}
+
+
+color_mapping <- c(
+  "fr_area" = "#4B5F43",  # Hunter Green
+  "hedgerow_area" = "#AEBD93",  # Sage
+  "riparian_area" = "#A7C7D8",  # Columbia blue
+  "paddocks_area" = "#F6AE2D"  # Orange (Pantone)
+)
+
+# Define the legend labels
+legend_labels <- c(
+  "fr_area" = "Forest Reserve",
+  "hedgerow_area" = "Hedgerows",
+  "riparian_area" = "Riparian Corridor",
+  "paddocks_area" = "Paddocks"
+)
+
+
+test <- area_by_department_land_use  |>
+  group_by(simulation, land_use_type) |>
+  summarize(area_forest_conserved = sum(total_area_lu, na.rm = TRUE)) %>%
+      arrange(-area_forest_conserved) %>%
+      mutate(simulation = factor(
+        simulation,
+        levels = c(
+          "50% Forest Reserve",
+          "5% Forest Reserve",
+          "Hedgerow incl. 25% Forest Reserve",
+          "25% Forest Reserve"
+        )
+      )) 
+
+# Reorder the factor levels
+test$land_use_type <- factor(test$land_use_type, levels = c("paddocks_area", "hedgerow_area", "riparian_area","fr_area"))
+# Shorten the simulation names
+levels(test$simulation) <- c("Business as Usual", "Forest Conservation","Economic Development","Law Ambiguity") 
+
+plot <-
+  ggplot(test,
+         aes(y = area_forest_conserved, x = simulation, fill = land_use_type)) +
+  geom_bar(
+    stat = 'identity',
+    position = 'stack',
+    color = "black",
+    linewidth = 0.25
+  ) +
+  labs(fill = "Land Use Type") +
+  scale_fill_manual(values = color_mapping,labels = legend_labels) +
+  guides(fill = guide_legend(override.aes = list(size = 36))) +  # Increase the size of the legend keys
+  theme_minimal() +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),  # Center the title
+        plot.background = element_rect(fill = "transparent"),  # Make the background transparent
+        axis.title.y = element_blank(),  # Remove y-axis title
+        axis.text.y = element_blank(),  # Remove y-axis text
+        axis.ticks.y = element_blank(),  # Remove y-axis ticks
+        axis.title.x = element_blank(),  # Remove x-axis title
+        axis.text.x = element_blank(),  # Remove x-axis text
+        axis.ticks.x = element_blank(),  # Remove x-axis ticks
+        legend.text = element_text(size = 24),
+        legend.title = element_text(size = 24)) + 
+  coord_flip()  # Flip the coordinates
+
+plot
+ggsave('~/github/Land-Use-Plan-Simulation/img/four_sim.png', bg = 'transparent', width = 16, height = 9)
+```
+
+```{r}
+total_stat <- area_by_department_land_use |>
+  filter(land_use_type != 'paddocks_area') |>
+  group_by(simulation, nom_dpto) |>
+  summarize(area_forest_conserved = sum(total_area_lu, na.rm = TRUE))
+ft <- flextable(total_stat)
+theme_vanilla(ft)
+```
+
+
+# Bar Plots 
+```{r}
+plot_land_use_type <- function(land_use, dataset) {
+  if (dataset == 'department') {
+    data_to_plot <- area_by_department_land_use %>%
+      filter(land_use_type == land_use)
+    
+    plot <- ggplot(data_to_plot, aes(x = nom_dpto, y = total_area_lu, fill = simulation)) +
+      geom_bar(stat = "identity", position = "dodge", color = "black", linewidth = 0.25) +
+      #scale_fill_manual(values = hcl.colors(3, "Dynamic")) +
+       # theme_minimal() +
+      labs(title = paste("Total Area of", land_use, "by Department and Simulation"),
+           x = "Department",
+           y = "Total Area") 
+
+  } else if (dataset == 'district') {
+    data_to_plot <- area_by_district_land_use %>%
+      filter(land_use_type == land_use)
+    
+   plot <-  ggplot(data_to_plot, aes(x = nom_dist, y = total_area_lu, fill = simulation)) +
+      geom_bar(stat = "identity", position = "dodge") +
+      #scale_fill_manual(values = hcl.colors(3, "Dynamic")) +
+      # theme_minimal() +
+      facet_wrap(~nom_dist, ncol = 5, scales = "free_x") +
+      labs(title = paste("Total Area of", land_use, "by District and Simulation"),
+           x = "District",
+           y = "Total Area") +
+      theme(axis.text.x = element_blank())
+  }
+
+  # Common theme and guides for both plots
+  plot + theme(legend.position = "top",
+            legend.direction = "horizontal") +
+    guides(fill = guide_legend(title.position = "top", nrow = 1))
+}
+
+
+```
+
+
+
+```{r}
+plot_land_use_type("fr_area", 'department')
+plot_land_use_type("fr_area", 'district')
+
+
+```
+```{r}
+#flat flat dark camouflage chalk copper dust earth fresh grape grass
+# greyscale light lilac pale sea sky  solarized
+ 
+ggthemr('solarized', layout = "clean")
+plot_land_use_type("fr_area", 'department') 
+
+plot_land_use_type("fr_area", 'district')
+
+ggthemr_reset()
+
+ggthemr('solarized', layout = "plain", type = 'outer')
+plot_land_use_type("fr_area", 'department') 
+
+plot_land_use_type("fr_area", 'district')
+
+ggthemr_reset()
+
+```
+ 
+```{r}
+ggthemr('flat dark', layout = "clean", type = 'outer')
+
+plot_land_use_type("hedgerow_area", 'department')
+plot_land_use_type("paddocks_area", 'department')
+plot_land_use_type("riparian_area", 'department')
+
+ggthemr_reset()
+
+```
+
+
+# Facet plots:
+
+```{r}
+plot_land_use_type_facet <- function(land_use, dataset) {
+  if (dataset == 'department') {
+    data_to_plot <- area_by_department_land_use %>%
+      filter(land_use_type == land_use)
+
+    plot <- ggplot(data_to_plot, aes(x = nom_dpto, y = total_area_lu, fill = simulation)) +
+      geom_bar(stat = "identity", position = "dodge", color = "black", linewidth = 0.25) +
+      labs(title =paste("Total Area", land_use),
+           x = "Department",
+           y = "Total Area")
+  } else if (dataset == 'district') {
+    data_to_plot <- area_by_district_land_use %>%
+      filter(land_use_type == land_use)
+
+    plot <- ggplot(data_to_plot, aes(x = nom_dist, y = total_area_lu, fill = simulation)) +
+      geom_bar(stat = "identity", position = "dodge", color = "black", linewidth = 0.25) +
+      facet_wrap(~nom_dist, ncol = 5, scales = "free_x") +
+      labs(title = paste("Total Area", land_use),
+           x = "District",
+           y = "Total Area") +
+      theme(axis.text.x = element_blank())
+  }
+
+  # Common theme, scale, and guides for both plots
+  plot + facet_wrap(~ land_use_type) +
+    scale_fill_manual(values = hcl.colors(4, "Dynamic")) +
+    theme_minimal() +
+    theme(legend.position = "top",
+          legend.direction = "horizontal") +
+    guides(fill = guide_legend(title.position = "top", nrow = 1))
+}
+```
+
+
+```{r}
+plot_land_use_type_facet("fr_area", 'department')
+plot_land_use_type_facet("fr_area", 'district')
+
+
+```
+
+
+
+# Stacked bar plots:
+
+
+
+
+```{r}
+plot_land_use_type_stacked <- function(dataset, name) {
+  if (dataset == 'department') {
+    data_to_plot <- area_by_department_land_use %>%
+      filter(land_use_type != 'paddocks_area' & nom_dpto == name) %>%
+      group_by(simulation, nom_dpto, land_use_type) %>%
+      arrange(-total_area_lu) %>%
+      mutate(simulation = factor(
+        simulation,
+        levels = c(
+          "50% Forest Reserve",
+          "25% Forest Reserve",
+          "5% Forest Reserve",
+          "Hedgerow incl. 25% Forest Reserve"
+        )
+      )) %>%
+      ungroup()
+    
+    plot <-
+      ggplot(data_to_plot,
+             aes(y = total_area_lu, x = simulation, fill = land_use_type)) +
+      geom_bar(
+        stat = 'identity',
+        position = 'stack',
+        color = "black",
+        linewidth = 0.25
+      ) +
+      labs(
+        title = paste("Total Area Conserved by Department and Simulation"),
+        y = "Total Area",
+        x = "Department"
+      ) +
+      facet_wrap(~ nom_dpto,
+                 ncol = 1,
+                 scales = "free_x")
+    
+  } else if (dataset == 'district') {
+    data_to_plot <- area_by_district_land_use %>%
+      filter(land_use_type != 'paddocks_area'& nom_dist == name) %>%
+      group_by(simulation, nom_dist, land_use_type) %>%
+      arrange(-total_area_lu) %>%
+      mutate(simulation = factor(
+        simulation,
+        levels = c(
+          "50% Forest Reserve",
+          "25% Forest Reserve",
+          "5% Forest Reserve",
+          "Hedgerow incl. 25% Forest Reserve"
+        )
+      )) %>%
+      ungroup()
+    
+    plot <- ggplot(data_to_plot, aes(y = total_area_lu, x = simulation, fill = land_use_type)) +
+      geom_bar(
+        stat = 'identity',
+        position = 'stack',
+        orientation = 'y',
+        color = "black",
+        linewidth = 0.25
+      ) +
+      facet_wrap(~nom_dist, ncol = 5, scales = "free_y") +
+      labs(title = paste("Total Area Conserved by District and Simulation"),
+           y = "District",
+           x = "Total Area") +
+      theme(axis.text.y = element_blank())
+    
+  
+  }
+
+    
+    # Common theme, scale, and guides for both plots
+    
+    plot + theme_minimal() +
+      theme(
+        legend.position = "top",
+        legend.direction = "horizontal",
+        strip.background = element_blank(),
+        strip.placement = "outside") +
+      guides(fill = guide_legend(title.position = "top", nrow = 1))
+}
+```
+
+
+```{r}
+
+
+plot_land_use_type_stacked( 'department',"PDTE. HAYES")
+    #  'department'
+ # "PDTE. HAYES" "BOQUERON" "ALTO PARAGUAY"
+
+  #district
+# [1] "BAHIA NEGRA"                   
+#  [2] "BENJAMIN ACEVAL"               
+#  [3] "BOQUERON"                      
+#  [4] "CAMPO ACEVAL"                  
+#  [5] "CARMELO PERALTA"               
+#  [6] "FILADELFIA"                    
+#  [7] "FUERTE OLIMPO"                 
+#  [8] "GRAL JOSE MARIA BRUGUEZ"       
+#  [9] "JOSE FALCON"                   
+# [10] "LOMA PLATA"                    
+# [11] "MCAL. ESTIGARRIBIA"            
+# [12] "NANAWA"                        
+# [13] "NUEVA ASUNCION"                
+# [14] "PUERTO CASADO"                 
+# [15] "PUERTO PINASCO"                
+# [16] "TTE 1RO MANUEL IRALA FERNANDEZ"
+# [17] "TTE. ESTEBAN MARTINEZ"         
+# [18] "VILLA HAYES" 
+```
+
+# plot_land_use_type_stackedh
+```{r}
+plot_land_use_type_stackedh <- function(dataset, name) {
+  if (dataset == 'department') {
+    data_to_plot <- area_by_department_land_use %>%
+      filter(land_use_type != 'paddocks_area' & nom_dpto == name) %>%
+      group_by(simulation, nom_dpto, land_use_type) %>%
+      arrange(-total_area_lu) %>%
+      mutate(simulation = factor(
+        simulation,
+        levels = c(
+          "50% Forest Reserve",
+          "25% Forest Reserve",
+          "5% Forest Reserve",
+          "Hedgerow incl. 25% Forest Reserve"
+        )
+      )) %>%
+      ungroup()
+    
+    plot <-
+      ggplot(data_to_plot,
+             aes(x = total_area_lu, y = simulation, fill = land_use_type)) +
+      geom_bar(
+        stat = "identity",
+        position = 'stack',
+        orientation = 'y',
+        color = "black",
+        linewidth = 0.25
+      ) +
+      labs(
+        title = paste("Total Area Conserved by Department and Simulation"),
+        x = "Total Area",
+        y = "Department"
+      ) +
+      facet_wrap(~ nom_dpto,
+                 ncol = 1,
+                 scales = "free_y",
+                 dir = 'h')
+    
+  } else if (dataset == 'district') {
+    data_to_plot <- area_by_district_land_use %>%
+      filter(land_use_type != 'paddocks_area' & nom_dist == name) %>%
+      group_by(simulation, nom_dist, land_use_type) %>%
+      arrange(-total_area_lu) %>%
+      mutate(simulation = factor(
+        simulation,
+        levels = c(
+          "50% Forest Reserve",
+          "25% Forest Reserve",
+          "5% Forest Reserve",
+          "Hedgerow incl. 25% Forest Reserve"
+        )
+      )) %>%
+      ungroup()
+    
+    plot <- ggplot(data_to_plot, aes(x = total_area_lu, y = simulation, fill = land_use_type)) +
+      geom_bar(
+        stat = "identity",
+        position = 'stack',
+        orientation = 'y',
+        color = "black",
+        linewidth = 0.25
+      ) +
+      facet_wrap(~nom_dist, ncol = 5, scales = "free_x", dir = 'h') +
+      labs(title = paste("Total Area Conserved by District and Simulation"),
+           x = "District",
+           y = "  Total Area") +
+      theme(axis.text.x = element_blank())
+    
+  
+  }
+    ggthemr('camouflage', layout = "plain", type = 'outer')
+    
+    # Common theme, scale, and guides for both plots
+    
+    plot +
+      theme(
+        legend.position = "top",
+        legend.direction = "horizontal",
+        strip.background = element_blank(),
+        strip.placement = "outside") +
+      guides(fill = guide_legend(title.position = "top", nrow = 1))
+}
+  
+```
+
+# plot_land_use_type_stackedh
+
+```{r}
+
+plot_land_use_type_stackedh('department', "PDTE. HAYES")
+    #  'department'
+ # "PDTE. HAYES" "BOQUERON" "ALTO PARAGUAY"
+
+  #district
+# [1] "BAHIA NEGRA"                   
+#  [2] "BENJAMIN ACEVAL"               
+#  [3] "BOQUERON"                      
+#  [4] "CAMPO ACEVAL"                  
+#  [5] "CARMELO PERALTA"               
+#  [6] "FILADELFIA"                    
+#  [7] "FUERTE OLIMPO"                 
+#  [8] "GRAL JOSE MARIA BRUGUEZ"       
+#  [9] "JOSE FALCON"                   
+# [10] "LOMA PLATA"                    
+# [11] "MCAL. ESTIGARRIBIA"            
+# [12] "NANAWA"                        
+# [13] "NUEVA ASUNCION"                
+# [14] "PUERTO CASADO"                 
+# [15] "PUERTO PINASCO"                
+# [16] "TTE 1RO MANUEL IRALA FERNANDEZ"
+# [17] "TTE. ESTEBAN MARTINEZ"         
+# [18] "VILLA HAYES
+
+```
+
+```{r}
+```
+
+
+

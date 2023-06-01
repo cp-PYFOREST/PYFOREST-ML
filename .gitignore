@@ -96,4 +96,5 @@ io/
 *03-preprocessing/resampled_cities.tif
 *03-preprocessing/resampled_soil.tif
 *03-preprocessing/resampled_ports.tif
-*05-outputs/model_output_lup_only
+*05-outputs/models
+

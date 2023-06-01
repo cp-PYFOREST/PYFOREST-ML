@@ -103,3 +103,7 @@ FEATURES_DIR = [
 SIMULATION_FEATURES_DIR = [
     os.path.join(OUTPUT_PATH[0], 'sim_lup_features')
 ]
+
+MASKED_RASTERS_SIM_DIR = [
+    os.path.join(OUTPUT_PATH[0], 'masked_rasters_sims')
+    ]
