@@ -10,112 +10,142 @@ library(flextable)
 sim5 <- read_csv('/Users/romero61/github/PYFOREST-ML/05-outputs/reports/predictions-log-lut-areas/sim-5-log-lut-area-hectares.csv')
 sim25 <- read_csv('/Users/romero61/github/PYFOREST-ML/05-outputs/reports/predictions-log-lut-areas/sim-25-log-lut-area-hectares.csv')
 sim50 <- read_csv('/Users/romero61/github/PYFOREST-ML/05-outputs/reports/predictions-log-lut-areas/sim-50-log-lut-area-hectares.csv')
-sim50 <- read_csv('/Users/romero61/github/PYFOREST-ML/05-outputs/reports/predictions-log-lut-areas/sim-50-log-lut-area-hectares.csv')
+simhedges <- read_csv('/Users/romero61/github/PYFOREST-ML/05-outputs/reports/predictions-log-lut-areas/sim-hedges-log-lut-area-hectares.csv')
 
-area_by_department_land_use <- readRDS('/Users/romero61/../../capstone/pyforest/shinydata/simulation/bar_plot_datasets/area_by_department_land_use.rds')
+
 
 ```
 
-```{r}
 
 
 simulation_data <- area_by_department_land_use  |>
-  filter((simulation != "Hedgerow incl. 25% Forest Reserve") & (land_use_type != 'paddocks_area')) |>
-  group_by(simulation) |>
-  summarize(protected_forest = sum(total_area_lu, na.rm = TRUE)) %>%
-      arrange(-protected_forest) %>%
+  group_by(simulation, land_use_type) |>
+  summarize(lut_area = sum(total_area_lu, na.rm = TRUE)) %>%
+      arrange(-lut_area) %>%
       mutate(simulation = factor(
         simulation,
         levels = c(
           "25% Forest Reserve",
           "50% Forest Reserve",
+           "Hedgerow incl. 25% Forest Reserve",
           "5% Forest Reserve"
-        ))) |> mutate(Type = "Simulation")
+        ))) |> mutate(type = "Simulation")
+
+
+simulation_data$land_use_type <- factor(simulation_data$land_use_type, levels = c("paddocks_area", "hedgerow_area", "riparian_area","fr_area"))
+
+
+levels(simulation_data$simulation) <- c("Current Forest Law", "Promotes Forest Conservation","Prioritize Economic Development","Law Ambiguity") 
 
 simulation_data
 
-```
-```{r}
-simulation_data <- area_by_department_land_use  |>
-  filter((simulation != "Hedgerow incl. 25% Forest Reserve") & (land_use_type == 'paddocks_area')) |>
-  summarize(protected_forest = sum(total_area_lu, na.rm = TRUE))
-```
+
+
+simulation_data |>
+  group_by(simulation) |>
+  summarize(tot_area = sum(lut_area))
 
 
 ```{r}
 # Combine the data frames
 prediction_data <- bind_rows(
-  sim5 %>% mutate(simulation = "5% Forest Reserve"),
-  sim25 %>% mutate(simulation = "25% Forest Reserve"),
-  sim50 %>% mutate(simulation = "50% Forest Reserve")) 
+  sim5 %>% mutate(simulation = "Law Ambiguity"),
+  sim25 %>% mutate(simulation = "Current Forest Law"),
+  sim50 %>% mutate(simulation = "Promotes Forest Conservation"),
+  simhedges %>% mutate(simulation = "Prioritize Economic Development")) 
+
+prediction_data$LandUseType <- factor(prediction_data$LandUseType, levels = c("Paddocks", "Hedgerow", "Riparian Corridor","Forest Reserve"))
 
 
+levels(prediction_data$simulation) <- c("Current Forest Law", "Promotes Forest Conservation","Prioritize Economic Development","Law Ambiguity") 
 
-predicted_protected <- prediction_data |>
-  filter(LandUseType != 'Paddocks') |>
-  group_by(simulation) |>
-  summarize(protected_forest = sum(NonDeforestedArea, na.rm = TRUE)) |>
-  arrange(-protected_forest) %>%
-      mutate(simulation = factor(
-        simulation,
-        levels = c(
-          "25% Forest Reserve",
-          "5% Forest Reserve",
-          "50% Forest Reserve"))) |>
-  mutate(Type = "Prediction")
-
-
-predicted_protected
+prediction_data
+```
+```{r}
+simulation_total_area <-  prediction_data |>
+  group_by(simulation, LandUseType) |>
+  summarize(total_area = sum(TotalArea))
+simulation_total_area
 ```
 
 
 ```{r}
-# Combine the simulation and prediction data
-combined_data <- rbind(
-  simulation_data,
-  predicted_protected)
-
-## Change the levels of the factor variable 'simulation'
-combined_data$simulation <- factor(combined_data$simulation, levels = c("50% Forest Reserve","5% Forest Reserve", "25% Forest Reserve" ))
-# Change the labels of the factor variable 'simulation'
-levels(combined_data$simulation) <- c("Promotes Forest Conservation", "Prioritize Cattle Production", "Current Law")
+color_mapping_deforestation <- c(
+  "Forest Reserve NonDeforested" = "#4B5F43",  # Hunter Green
+  "Hedgerow NonDeforested" = "#AEBD93",  # Sage
+  "Riparian Corridor NonDeforested" = "#A7C7D8",  # Columbia blue
+  "Paddocks NonDeforested" = "#F6AE2D",  # Orange (Pantone)
+  "Forest Reserve Deforested" = "#2F4858",  # Darker Hunter Green
+  "Hedgerow Deforested" = "#6E7B5A",  # Darker Sage
+  "Riparian Corridor Deforested" = "#33658A",  # Darker Columbia blue
+  "Paddocks Deforested" = "#F26419"  # Darker Orange
+)
 ```
 
 ```{r}
-simulation_data$simulation <- factor(simulation_data$simulation, levels = c("50% Forest Reserve","5% Forest Reserve", "25% Forest Reserve" ))
+# Reshape the data
+prediction_data_long <- prediction_data %>%
+  pivot_longer(cols = c(DeforestedArea, NonDeforestedArea),
+               names_to = "DeforestationStatus",
+               values_to = "Area") %>%
+  mutate(LandUseTypeStatus = interaction(LandUseType, DeforestationStatus, sep = " ")) |>
+  select(LandUseType, simulation, Area, LandUseTypeStatus)
 
-levels(simulation_data$simulation) <- c("Promotes Forest Conservation", "Prioritize Cattle Production", "Current Law")
+# Set the levels of the new factor variable in the desired order
+levels(prediction_data_long$LandUseTypeStatus) <- c(
+  "Paddocks Deforested", "Hedgerow Deforested", "Riparian Corridor Deforested", "Forest Reserve Deforested",
+  "Paddocks NonDeforested", "Hedgerow NonDeforested", "Riparian Corridor NonDeforested", "Forest Reserve NonDeforested"
+)
+
+prediction_data_long
 ```
 
 
 
 
+
 ```{r}
-color_map = c( "Promotes Forest Conservation" = "#AEBD93",
-               "Prioritize Cattle Production" = "#AEBD93",
-               "Current Law" = "#AEBD93")
+# Create the bar plot
+plot1 <- ggplot(prediction_data_long, aes(x = simulation, y = Area, fill = LandUseTypeStatus)) +
+  geom_bar(stat = 'identity', position = 'stack', color = "black", linewidth = 0.25) +
+  scale_fill_manual(values = color_mapping_deforestation) +
+  labs(x = "Simulation", y = "Area", fill = "LandUseTypeStatus") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.background = element_rect(fill = "transparent"),
+        legend.position = "top") +
+  coord_flip()  # Flip the coordinates
+
+plot1
+```
+
+
+
+```{r}
+color_mapping <- c(
+  "Forest Reserve" = "#4B5F43",  # Hunter Green
+  "Hedgerow" = "#AEBD93",  # Sage
+  "Riparian Corridor" = "#A7C7D8",  # Columbia blue
+  "Paddocks" = "#F26419"  # Hunyadi yellow
+)
   
+```
 
- "#AEBD93"  # Sage
-  "#4B5F43"  # Hunter Green
-"#F6AE2D"  # Orange (Pantone)
-  "#A7C7D8"  # Columbia blue
 
-# 
-# 
-# Reorder the factor levels
-simulation_data$simulation <- factor(simulation_data$simulation, levels = c("50% Forest Reserve","5% Forest Reserve", "25% Forest Reserve" ))
 
-levels(simulation_data$simulation) <- c("Promotes Forest Conservation", "Prioritize Cattle Production", "Current Law")
+
+
+```{r}
+simulation_total_area
 ```
 
 
 ```{r}
 # Create the bar plot
-plot <- ggplot(simulation_data, aes(x = simulation, y = protected_forest, fill = simulation)) +
-  geom_bar(stat = 'identity', color = "black", linewidth = 0.25) +
-  scale_fill_manual(values = color_map) +
-  labs(x = "Simulation", y = "Protected Forest", fill = "simulation") +
+plot2 <- ggplot(simulation_total_area, aes(x = simulation, y = total_area, fill = LandUseType)) +
+  geom_bar(stat = 'identity',  color = "black", linewidth = 0.25) +
+  labs(x = "Simulation", y = "Total Area", fill = "LandUseType") +
+  scale_fill_manual(values = color_mapping) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5),
         plot.background = element_rect(fill = "transparent"),
@@ -123,7 +153,7 @@ plot <- ggplot(simulation_data, aes(x = simulation, y = protected_forest, fill =
         ) +
   coord_flip()  # Flip the coordinates
 
-plot
+plot2
 
 
 
@@ -133,57 +163,55 @@ plot
 ```
 
 ```{r}
-# Create the side-by-side bar plot
-plot_pred <- ggplot(combined_data, aes(x = simulation, y = protected_forest, fill = Type)) +
-  geom_bar(stat = 'identity', position = 'dodge', color = "black", linewidth = 0.25) +
-  scale_fill_manual(values = c("Simulation" = "#AEBD93", "Prediction" = "#4B5F43")) +
-  labs(x = "Simulation", y = "Protected Forest", fill = "Type") +
+simulation_total_area$type <- "Simulation"
+prediction_data_long$type <- "Prediction"
+# Assign LandUseTypeStatus in simulation_total_area
+simulation_total_area$LandUseTypeStatus <- ifelse(simulation_total_area$LandUseType == "Paddocks", 
+                                                  "Paddocks Deforested", 
+                                                  paste(simulation_total_area$LandUseType, "NonDeforested"))
+simulation_total_area$Area <- simulation_total_area$total_area
+combined_data <- bind_rows(simulation_total_area, prediction_data_long)
+
+combined_data$simulation_type <- paste(combined_data$simulation, combined_data$type)
+
+
+
+
+
+```
+```{r}
+# Create the plot
+ggplot(combined_data, aes(x = simulation_type, y = Area, fill = LandUseTypeStatus)) +
+  geom_bar(stat = 'identity', position = 'stack', color = "black", linewidth = 0.25) +
+  scale_fill_manual(values = color_mapping_deforestation) +
+  labs(x = "Type", y = "Area", fill = "LandUseTypeStatus") +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5),
         plot.background = element_rect(fill = "transparent"),
-        legend.text = element_text(size = 24),
-        legend.title = element_text(size = 24),
         legend.position = "top") +
-  coord_flip()  
-plot_pred
-#ggsave('~/github/Land-Use-Plan-Simulation/img/predictions.png', bg = 'transparent', width = 16, height = 9)
+  coord_flip()  # Flip the coordinates
+
+
 ```
-
-
-
-`
-
 ```{r}
-# For simulation data
-simulation_summary <- area_by_department_land_use %>%
-  group_by(land_use_type) %>%
-  summarise(total_area = sum(total_area_lu))
 
-# For prediction data
-prediction_summary <- prediction_data %>%
-  group_by(LandUseType) %>%
-  summarise(total_area = sum(DeforestedArea) + sum(NonDeforestedArea))
-
-names(prediction_summary) <- c("land_use_type", "total_area")
-
-# Add a new column to distinguish between simulation and prediction
-simulation_summary <- simulation_summary %>%
-  mutate(type = "Simulation")
-
-prediction_summary <- prediction_summary %>%
-  mutate(type = "Prediction")
+# Reorder the factor levels
+combined_data$LandUseTypeStatus <- factor(combined_data$LandUseTypeStatus, levels = c(
+  "Paddocks Deforested", "Hedgerow Deforested", "Riparian Corridor Deforested", "Forest Reserve Deforested",
+  "Paddocks NonDeforested", "Hedgerow NonDeforested", "Riparian Corridor NonDeforested", "Forest Reserve NonDeforested"
+))
 
 
-# Combine the two data frames
-combined_data <- rbind(simulation_summary, prediction_summary)
-
-
-
-
-ggplot(combined_data, aes(fill=type, y=total_area, x=land_use_type)) + 
-  geom_bar(position="dodge", stat="identity") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  labs(x = "Land Use Type", y = "Total Area", fill = "type")
-
+# Create the plot
+ggplot(combined_data, aes(x = simulation_type, y = Area, fill = LandUseTypeStatus)) +
+  geom_bar(stat = 'identity', position = 'stack', color = "black", linewidth = 0.25) +
+  scale_fill_manual(values = color_mapping_deforestation) +
+  labs(x = "Type", y = "Area", fill = "LandUseTypeStatus") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.background = element_rect(fill = "transparent"),
+        legend.position = "top") +
+  coord_flip()  # Flip the coordinates
 
 ```
+
