@@ -83,7 +83,8 @@ For each of the simulations created in Objective 2 a corresponding map of  pixel
 <img src="https://github.com/cp-PYFOREST/.github/blob/main/img/obj3-prediction-map25.png" alt="Pixel-wise probability of deforestation in the undeveloped Chaco region">
 
 </h2>
-_Pixel-wise probability of deforestation in the undeveloped Chaco region_
+
+*Pixel-wise probability of deforestation in the undeveloped Chaco region*
 
 The bins created for deforested and non-deforested create eight divisions,  as opposed to simply the four categorical divisions of the simulations. As an example, the one categorical variable of paddocks in the simulation has two division for the prediction, the area designated as paddocks that we predict as deforested and the remaining area of paddocks designated as non-deforested. 
 
@@ -106,7 +107,9 @@ These results provide a comparative overview of the expected deforestation rates
 <img src="https://github.com/cp-PYFOREST/.github/blob/main/img/obj3-stats.png" alt="Comparison of Deforestation and Areas under Different Policy Scenarios by Land Use Types. Riparian Corridor Deforestation is insignificant, Non-deforested Riparian Corridor remains relatively constant.">
 
 </h2>
-_Comparison of Deforestation and Areas under Different Policy Scenarios by Land Use Types. Riparian Corridor Deforestation is insignificant, Non-deforested Riparian Corridor remains relatively constant._
+
+*Comparison of Deforestation and Areas under Different Policy Scenarios by Land Use Types. Riparian Corridor Deforestation is insignificant, Non-deforested Riparian Corridor remains relatively constant.*
+
 
 **Table 3: Comparison of Deforestation Rates and Areas under Different Policy Scenarios**
 
@@ -127,7 +130,9 @@ Examining the pixel-wise probabilities of deforestation in the western region (s
 <img src="https://github.com/cp-PYFOREST/.github/blob/main/img/obj3-depts.png" alt="Left, western edge of study boundary of Department Boqueron with higher probabilities of deforestation. Right, southern tip of study boundary of Department Presidente Hayes with low to zero probabilities of deforestation.">
 
 </h2>
-_Left, western edge of study boundary of Department Boqueron with higher probabilities of deforestation. Right, southern tip of study boundary of Department Presidente Hayes with low to zero probabilities of deforestation._
+
+*Left, western edge of study boundary of Department Boqueron with higher probabilities of deforestation. Right, southern tip of study boundary of Department Presidente Hayes with low to zero probabilities of deforestation.*
+
 
 The patterns observed suggest a potential high spatial autocorrelation within the trained model. Feature importance analysis on the trained model identifies distance to rivers and roads as the most influential features, accounting for approximately 20-25% of the model's predictive power, followed by precipitation. This is strongly reflected in the southern region, which boasts a dense network of rivers and experiences higher annual average precipitation. To further understand the influence of LUPs on the model's predictive power, refer to Figure 14 a-d, which contrasts against the pixel-wise probability raster of the corresponding simulation.
 
@@ -136,7 +141,9 @@ The patterns observed suggest a potential high spatial autocorrelation within th
 <img src="https://github.com/cp-PYFOREST/.github/blob/main/img/obj3-lups.png" alt="Contrasting pixel-wise probability rasters of deforestation against corresponding simulations to illustrate the influence of land use plans on the model's predictive power. Each panel (a-d) represents a different scenario, highlighting the variability in deforestation probabilities across different land use plan categories.">
    
 </h2>
-_Contrasting pixel-wise probability rasters of deforestation against corresponding simulations to illustrate the influence of land use plans on the model's predictive power. Each panel (a-d) represents a different scenario, highlighting the variability in deforestation probabilities across different land use plan categories._
+
+*Contrasting pixel-wise probability rasters of deforestation against corresponding simulations to illustrate the influence of land use plans on the model's predictive power. Each panel (a-d) represents a different scenario, highlighting the variability in deforestation probabilities across different land use plan categories.*
+
 
 In a more detailed examination of the influence of the LUP, we can observe distinct patterns across different categories. In all scenarios, the outlines of the various categories within the LUP are discernible, and they generally exhibit higher probabilities in areas designated for deforestation. However, these areas also display a range of probabilities, with some spots nearing a probability of 1, indicating almost certain deforestation, and others hovering around 0.33, suggesting a lower but still significant risk.
 
@@ -153,7 +160,8 @@ This underscores the potential of our model as a tool for policy simulation and 
 <img src="https://github.com/cp-PYFOREST/.github/blob/main/img/obj3-hansen.png" alt="Two representative examples demonstrating the model's predictive power in simulating land use plans. These simulations, created in an area previously devoid of any land use plan, align closely with the actual deforestation patterns from Hansen (2013), underscoring the model's potential in forecasting outcomes under various policy scenarios">
    
 </h2>
-_Two representative examples demonstrating the model's predictive power in simulating land use plans. These simulations, created in an area previously devoid of any land use plan, align closely with the actual deforestation patterns from Hansen (2013), underscoring the model's potential in forecasting outcomes under various policy scenarios_
+
+*Two representative examples demonstrating the model's predictive power in simulating land use plans. These simulations, created in an area previously devoid of any land use plan, align closely with the actual deforestation patterns from Hansen (2013), underscoring the model's potential in forecasting outcomes under various policy scenarios*
 
 ## Data Information
 Soon on Zenodo
