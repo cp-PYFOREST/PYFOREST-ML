@@ -104,7 +104,7 @@ These results provide a comparative overview of the expected deforestation rates
 
 <h2 align="center">
 
-<img src="https://github.com/cp-PYFOREST/.github/blob/main/img/obj3-stats.png" alt="Comparison of Deforestation and Areas under Different Policy Scenarios by Land Use Types. Riparian Corridor Deforestation is insignificant, Non-deforested Riparian Corridor remains relatively constant.">
+<img src="https://github.com/cp-PYFOREST/.github/blob/main/img/sim-vs-pred-bg.jpg" alt="Comparison of Deforestation and Areas under Different Policy Scenarios by Land Use Types. Riparian Corridor Deforestation is insignificant, Non-deforested Riparian Corridor remains relatively constant.">
 
 </h2>
 
