@@ -3,6 +3,7 @@ library(tidyverse)
 library(ggthemr)
 library(plotly)
 library(flextable)
+library(patchwork)
 ```
 
 ```{r}
@@ -18,33 +19,6 @@ simhedges <- read_csv('/Users/romero61/github/PYFOREST-ML/05-outputs/reports/pre
 
 
 
-simulation_data <- area_by_department_land_use  |>
-  group_by(simulation, land_use_type) |>
-  summarize(lut_area = sum(total_area_lu, na.rm = TRUE)) %>%
-      arrange(-lut_area) %>%
-      mutate(simulation = factor(
-        simulation,
-        levels = c(
-          "25% Forest Reserve",
-          "50% Forest Reserve",
-           "Hedgerow incl. 25% Forest Reserve",
-          "5% Forest Reserve"
-        ))) |> mutate(type = "Simulation")
-
-
-simulation_data$land_use_type <- factor(simulation_data$land_use_type, levels = c("paddocks_area", "hedgerow_area", "riparian_area","fr_area"))
-
-
-levels(simulation_data$simulation) <- c("Current Forest Law", "Promotes Forest Conservation","Prioritize Economic Development","Law Ambiguity") 
-
-simulation_data
-
-
-
-simulation_data |>
-  group_by(simulation) |>
-  summarize(tot_area = sum(lut_area))
-
 
 ```{r}
 # Combine the data frames
@@ -52,12 +26,12 @@ prediction_data <- bind_rows(
   sim5 %>% mutate(simulation = "Law Ambiguity"),
   sim25 %>% mutate(simulation = "Current Forest Law"),
   sim50 %>% mutate(simulation = "Promotes Forest Conservation"),
-  simhedges %>% mutate(simulation = "Prioritize Economic Development")) 
+  simhedges %>% mutate(simulation = "Prioritize Cattle Production")) 
 
 prediction_data$LandUseType <- factor(prediction_data$LandUseType, levels = c("Paddocks", "Hedgerow", "Riparian Corridor","Forest Reserve"))
 
 
-levels(prediction_data$simulation) <- c("Current Forest Law", "Promotes Forest Conservation","Prioritize Economic Development","Law Ambiguity") 
+levels(prediction_data$simulation) <- c("Current Forest Law", "Promotes Forest Conservation","Prioritize Cattle Production","Law Ambiguity") 
 
 prediction_data
 ```
@@ -69,6 +43,7 @@ simulation_total_area
 ```
 
 
+
 ```{r}
 color_mapping_deforestation <- c(
   "Forest Reserve NonDeforested" = "#4B5F43",  # Hunter Green
@@ -77,7 +52,7 @@ color_mapping_deforestation <- c(
   "Paddocks NonDeforested" = "#F6AE2D",  # Orange (Pantone)
   "Forest Reserve Deforested" = "#2F4858",  # Darker Hunter Green
   "Hedgerow Deforested" = "#6E7B5A",  # Darker Sage
-  "Riparian Corridor Deforested" = "#33658A",  # Darker Columbia blue
+  "Riparian Corridor Deforested" = "#F8F7F1",  # Darker Columbia blue
   "Paddocks Deforested" = "#F26419"  # Darker Orange
 )
 ```
@@ -143,13 +118,19 @@ simulation_total_area
 ```{r}
 # Create the bar plot
 plot2 <- ggplot(simulation_total_area, aes(x = simulation, y = total_area, fill = LandUseType)) +
-  geom_bar(stat = 'identity',  color = "black", linewidth = 0.25) +
+  geom_bar(stat = 'identity',  color = "black", linewidth =1) +
   labs(x = "Simulation", y = "Total Area", fill = "LandUseType") +
   scale_fill_manual(values = color_mapping) +
+  guides(fill = guide_legend(override.aes = list(size = 12))) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5),
-        plot.background = element_rect(fill = "transparent"),
         legend.position = "top",
+        legend.text = element_text(size = 18),
+        legend.title = element_text(size = 18),
+        axis.text.x = element_text(size = 18),
+        axis.text.y = element_text(size = 18),
+        axis.title.x = element_text(size = 18),
+        axis.title.y = element_text(size = 18)
         ) +
   coord_flip()  # Flip the coordinates
 
@@ -179,20 +160,7 @@ combined_data$simulation_type <- paste(combined_data$simulation, combined_data$t
 
 
 ```
-```{r}
-# Create the plot
-ggplot(combined_data, aes(x = simulation_type, y = Area, fill = LandUseTypeStatus)) +
-  geom_bar(stat = 'identity', position = 'stack', color = "black", linewidth = 0.25) +
-  scale_fill_manual(values = color_mapping_deforestation) +
-  labs(x = "Type", y = "Area", fill = "LandUseTypeStatus") +
-  theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5),
-        plot.background = element_rect(fill = "transparent"),
-        legend.position = "top") +
-  coord_flip()  # Flip the coordinates
 
-
-```
 ```{r}
 
 # Reorder the factor levels
@@ -203,15 +171,122 @@ combined_data$LandUseTypeStatus <- factor(combined_data$LandUseTypeStatus, level
 
 
 # Create the plot
-ggplot(combined_data, aes(x = simulation_type, y = Area, fill = LandUseTypeStatus)) +
-  geom_bar(stat = 'identity', position = 'stack', color = "black", linewidth = 0.25) +
-  scale_fill_manual(values = color_mapping_deforestation) +
-  labs(x = "Type", y = "Area", fill = "LandUseTypeStatus") +
+all_plot <- ggplot(combined_data, aes(x = simulation_type, y = Area, fill = LandUseTypeStatus)) +
+  geom_bar(stat = 'identity', position = 'stack', color = "black", linewidth = 0.7) +
+  scale_fill_manual(values = color_mapping_deforestation,
+                   labels = str_wrap(levels(combined_data$LandUseTypeStatus), width = 12) ) +
+  guides(fill = guide_legend(reverse = TRUE,
+                             override.aes = list(size = 18))) +  # Increase the size of the legend keys
+  labs(x = "Type", y = "Area", fill = "Land Use Type Status") +
   theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5),
+  theme(plot.title = element_text(hjust = 1),
         plot.background = element_rect(fill = "transparent"),
-        legend.position = "top") +
+        legend.position = "top",
+        legend.direction = 'horizontal',
+        legend.text = element_text(size= 12),
+        axis.text.x = element_text(size = 18),
+        axis.text.y = element_text(size = 18),
+        axis.title.x = element_text(size = 18),
+        axis.title.y = element_text(size = 18),
+        axis.text = element_text(color = 'black')) +
   coord_flip()  # Flip the coordinates
 
+all_plot
+
+
+
+ggsave('~/github/Land-Use-Plan-Simulation/img/sim-vs-pred2.png', bg = 'transparent', width = 16, height = 9) # width = 32, height = 2
+  
 ```
+
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = c(0.45,.97),
+        legend.direction = 'horizontal',
+        legend.background = element_rect(fill ='transparent'),
+        #plot.background = element_rect(fill ='transparent'),
+        legend.text = element_text(size = 26),
+        legend.title = element_text(size = 26),
+        axis.text.x = element_text(size = 34),
+        axis.text.y = element_text(size = 34),
+        axis.title.x = element_text(size = 34),
+        axis.title.y = element_text(size = 34),
+        axis.text = element_text(color = 'black')
+        ) 
+
+
+
+```{r}
+# For comparisons
+temp_select_simulation <- prediction_data %>%
+  filter((simulation == "Current Forest Law") | (simulation == "Law Ambiguity")) %>%
+  group_by(simulation, LandUseType) %>%
+  summarise(TotalArea = sum(TotalArea)) %>%
+  pivot_wider(names_from = LandUseType, values_from = TotalArea) %>%
+  mutate(`Forest Conserved` = Hedgerow + `Forest Reserve` + `Riparian Corridor`,
+         `Area Authorized For Deforestation` = Paddocks) %>%
+  select(simulation, `Forest Conserved`, `Area Authorized For Deforestation`)
+
+ft <- flextable(temp_select_simulation)
+
+
+theme_box(ft)
+```
+
+
+
+
+```{r}
+# Calculate the deforestation rate for each combination of simulation_type and LandUseTypeStatus
+deforestation_rate <- prediction_data %>%
+  group_by(simulation) %>%
+  summarize(`Predicted NonDeforested` = sum(NonDeforestedArea),
+            `Predicted Deforested` = sum(DeforestedArea),
+            `Total Area` = (`Predicted Deforested` + `Predicted NonDeforested`),
+            `Deforestation Rate` = (`Predicted Deforested`/ `Total Area` ) * 100)
+dft <- flextable(deforestation_rate)
+
+
+theme_box(dft)
+
+```
+
+```{r}
+SimulationNonDeforested <- simulation_total_area |> 
+  filter(LandUseType != 'Paddocks')|>
+  group_by(simulation) |>
+  summarize(NonDeforested = sum(total_area)) 
+  
+SimulationDeforested <- simulation_total_area |> 
+  filter(LandUseType == 'Paddocks')|>
+  group_by(simulation) |>
+  summarize(NonDeforested = sum(total_area)) 
+
+dsft <- flextable(SimulationNonDeforested)
+
+
+theme_box(dsft)
+
+dsft2 <- flextable(SimulationDeforested)
+
+
+theme_box(dsft2)
+
+
+sim_temp <- left_join(SimulationNonDeforested, SimulationDeforested, by = 'simulation')  %>%
+  select(simulation, `Simulation NonDeforested` = NonDeforested.x, `Simulation Deforested` = NonDeforested.y)
+sim_temp
+```
+
+```{r}
+simulation_prediction_stats <- left_join(sim_temp,deforestation_rate)
+
+sim_pred_ft <- flextable(simulation_prediction_stats)
+
+
+theme_box(sim_pred_ft)
+```
+```{r}
+((all_plot + gen_grob(sim_pred_ft, fit = 'auto', just = "bottom", scaling = 'min'))) 
+```
+
 
